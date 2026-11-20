@@ -1,7 +1,7 @@
 // Nos courses : garde l'app sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Les données de la liste ne passent pas par ici : Firestore les met lui-même en cache.
-const CACHE = "nos-courses-v1";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const CACHE = "nos-courses-v2";
+const SHELL = ["./", "./index.html", "./rayons.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -9,6 +9,10 @@ Liste de courses partagée entre deux téléphones.
 
 La configuration Firebase présente dans `index.html` n'est pas secrète : la protection vient des règles Firestore.
 
+## Rayons
+
+Les articles sont rangés automatiquement par rayon grâce au catalogue de `rayons.js` : le premier mot reconnu du nom décide du rayon, au singulier ou au pluriel. Un article inconnu va dans « Autres ». Pour corriger un classement, il suffit d'ajouter le mot dans la liste du bon rayon.
+
 ## Données
 
 | Collection | Contenu |

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nos courses</title>
 <meta name="description" content="La liste de courses partagée de la maison.">
-<meta name="theme-color" content="#EEF2EC" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1512" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,201 +16,134 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,600..800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* Layout : une colonne étroite. En-tête, barre d'ajout collante, liste à acheter, puis le panier imprimé comme un ticket de caisse. */
-  --paper: #EEF2EC;
-  --surface: #FFFFFF;
-  --ink: #16201A;
-  --muted: #5B6A61;
-  --line: #D7DFD5;
-  --accent: #1D6A49;
+  /* Maquette 1 « Rayons pastel » : fond blanc, une colonne aérée, une couleur par rayon, un accent indigo pour les actions. */
+  --bg: #FFFFFF;
+  --soft: #F3F4F8;
+  --ink: #1B1D22;
+  --muted: #6B7080;
+  --faint: #8E93A1;
+  --line: #E6E8EF;
+  --accent: #4353FF;
   --accent-ink: #FFFFFF;
-  --fresh: #F1BE2B;
-  --fresh-ink: #2A2100;
-  --danger: #A8382C;
-  --ticket: #FCFCF8;
-  --ticket-ink: #2B2F2C;
-  --display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
-  --body: "Atkinson Hyperlegible", -apple-system, "Segoe UI", Roboto, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --new-bg: #FFE7A3;
+  --new-ink: #6B4A00;
+  --danger: #B42318;
+  --font: "Figtree", -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0F1512;
-    --surface: #17201B;
-    --ink: #E6EDE8;
-    --muted: #93A399;
-    --line: #28332D;
-    --accent: #52B788;
-    --accent-ink: #06140D;
-    --fresh: #E9B92E;
-    --fresh-ink: #231B00;
-    --danger: #E0705F;
-    --ticket: #1B241F;
-    --ticket-ink: #D9E3DC;
-    color-scheme: dark;
-  }
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; background: var(--paper); }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.4 var(--body); }
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.4 var(--font); }
+button, input { font-family: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 [hidden] { display: none !important; }
 
-.wrap { max-width: 560px; margin: 0 auto; padding: 20px 16px 120px; display: flex; flex-direction: column; gap: 18px; }
-
-/* Démarrage */
-.boot { max-width: 560px; margin: 0 auto; padding: 40px 16px; color: var(--muted); }
+.wrap { max-width: 560px; margin: 0 auto; padding: 28px 24px 32px; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.boot { max-width: 560px; margin: 0 auto; padding: 40px 24px; color: var(--muted); }
 
 /* En-tête */
-.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.eyebrow { font-size: 14px; font-weight: 700; color: var(--muted); }
-.pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--muted);
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: 999px; padding: 4px 10px 4px 8px; white-space: nowrap;
-}
-.pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-.pill[data-s="live"] .dot { background: var(--accent); }
-.pill[data-s="connecting"] .dot, .pill[data-s="sending"] .dot { animation: pulse 1.2s ease-in-out infinite; }
-.pill[data-s="sending"] .dot { background: var(--accent); }
-.pill[data-s="offline"] .dot { background: var(--fresh); }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.date { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; color: #4A4F5C; background: var(--soft); }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #A3A8B5; }
+.pill[data-s="live"] { color: #23663A; background: #E3F5E1; }
+.pill[data-s="live"] .dot { background: #4CB867; }
+.pill[data-s="sending"] { color: #1E4F9A; background: #E2EEFF; }
+.pill[data-s="sending"] .dot { background: #4A8BF0; animation: pulse 1.2s ease-in-out infinite; }
+.pill[data-s="connecting"] .dot { animation: pulse 1.2s ease-in-out infinite; }
+.pill[data-s="offline"] { color: #8A4B00; background: #FFF0D9; }
+.pill[data-s="offline"] .dot { background: #F5A524; }
+.pill[data-s="error"] { color: var(--danger); background: #FDE4E1; }
 .pill[data-s="error"] .dot { background: var(--danger); }
-@keyframes pulse { 50% { opacity: .25; } }
-
-h1 {
-  font-family: var(--display); font-weight: 800; font-stretch: 76%;
-  font-size: clamp(60px, 19vw, 96px); line-height: .86; letter-spacing: -.025em;
-  margin: 8px 0 0; text-wrap: balance;
-}
-.summary { margin: 8px 0 0; font-size: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+@keyframes pulse { 50% { opacity: .3; } }
+h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+.summary { margin: 4px 0 0; font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .summary b { color: var(--ink); }
 
-/* Barre d'ajout */
-.composer {
-  position: sticky; top: 0; z-index: 5; background: var(--paper);
-  margin: 0 -16px; padding: 10px 16px 12px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.add { display: flex; gap: 8px; }
-.field {
-  flex: 1; min-width: 0; height: 52px; padding: 0 16px;
-  font: inherit; font-size: 17px; color: var(--ink);
-  background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; outline: none;
-}
-.field::placeholder { color: var(--muted); }
-.field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
-.btn-primary {
-  flex: none; height: 52px; padding: 0 18px; border: 0; border-radius: 14px;
-  background: var(--accent); color: var(--accent-ink); font: 700 16px var(--body); cursor: pointer;
-}
-.btn-primary:active { transform: translateY(1px); }
-.btn-primary:disabled { opacity: .6; cursor: default; }
-.linkish { background: none; border: 0; padding: 4px 0; color: var(--accent); font: 700 15px var(--body); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-
-.chips { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px 2px; }
+/* Ajout */
+.composer { position: sticky; top: 0; z-index: 5; background: var(--bg); margin: 0 -24px; padding: 18px 24px 4px; }
+.add { display: flex; gap: 10px; }
+.field { flex: 1; min-width: 0; height: 52px; border: 0; border-radius: 16px; background: var(--soft); padding: 0 18px; font-size: 17px; color: var(--ink); outline: none; }
+.field::placeholder { color: var(--faint); }
+.field:focus { box-shadow: 0 0 0 2px var(--accent); }
+.btn-add { flex: none; width: 52px; height: 52px; border: 0; border-radius: 16px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; }
+.btn-add:active { transform: translateY(1px); }
+.chips { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 14px -24px 0; padding: 0 24px 2px; }
 .chips::-webkit-scrollbar { display: none; }
 .chips-label { flex: none; font-size: 13px; font-weight: 700; color: var(--muted); }
-.chip {
-  flex: none; display: inline-flex; align-items: center; gap: 4px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
-  border-radius: 999px; padding: 7px 12px 7px 10px; font: 15px var(--body); cursor: pointer;
-}
+.chip { flex: none; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: 15px; color: var(--ink); cursor: pointer; }
 .chip span { color: var(--accent); font-weight: 700; }
-@media (hover: hover) { .chip:hover { border-color: var(--accent); } }
 
 /* Messages */
-.notice {
-  background: color-mix(in srgb, var(--fresh) 20%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--fresh) 55%, var(--line));
-  border-radius: 14px; padding: 12px 14px; font-size: 15px;
-}
+.notice { margin-top: 16px; background: #FFF6D6; border-radius: 14px; padding: 12px 14px; font-size: 15px; color: #5C4300; }
 .install { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
 .install p { margin: 0; }
 
-/* Liste à acheter */
-.sec { margin: 0 0 8px; font: 700 13px var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.list { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
-.row { display: flex; align-items: stretch; border-top: 1px solid var(--line); }
-.row:first-child { border-top: 0; }
-.main {
-  flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px;
-  padding: 14px 6px 14px 16px; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer;
-}
-.box { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--muted) 70%, transparent); transition: background .15s, border-color .15s; }
-.main:active .box { background: var(--accent); border-color: var(--accent); }
-@media (hover: hover) { .main:hover .box { border-color: var(--accent); } }
-.txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.name { font-size: 18px; line-height: 1.3; overflow-wrap: anywhere; }
+/* Rayons */
+.rayons { margin-top: 24px; display: flex; flex-direction: column; gap: 18px; }
+.rayon h2 { margin: 0 0 2px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.rayon h2 .dot { width: 10px; height: 10px; border-radius: 50%; }
+.rayon h2 .count { color: var(--faint); font-weight: 600; letter-spacing: 0; }
+.items { list-style: none; margin: 0; padding: 0; }
+.item { display: flex; align-items: center; gap: 8px; min-height: 52px; border-radius: 12px; }
+.check { flex: none; width: 44px; height: 44px; margin-left: -11px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; }
+.ring { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; transition: background .15s; }
+.check:active .ring { background: currentColor; }
+.item.done .ring { background: currentColor; }
+.ring svg { width: 13px; height: 13px; }
+.txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 4px 0; }
+.name { font-size: 17px; font-weight: 500; overflow-wrap: anywhere; }
 .meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 13px; color: var(--muted); }
-.new { background: var(--fresh); color: var(--fresh-ink); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; }
-.del { flex: none; width: 52px; display: grid; place-items: center; background: none; border: 0; color: var(--muted); cursor: pointer; }
-.del svg { width: 18px; height: 18px; }
+.new { background: var(--new-bg); color: var(--new-ink); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 5px; padding: 1px 6px; }
+.item.done .name { color: var(--faint); text-decoration: line-through; }
+.item.done .meta { color: var(--faint); }
+.del { flex: none; width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: #B5BAC6; display: grid; place-items: center; cursor: pointer; }
+.del svg { width: 16px; height: 16px; }
 @media (hover: hover) { .del:hover { color: var(--danger); } }
-.row.flash { animation: flash 1.4s ease-out; }
-@keyframes flash { 0%, 35% { background: color-mix(in srgb, var(--fresh) 40%, var(--surface)); } 100% { background: var(--surface); } }
-.empty { border: 1.5px dashed var(--line); border-radius: 18px; padding: 26px 20px; color: var(--muted); font-size: 16px; }
+.item.flash { animation: flash 1.4s ease-out; }
+@keyframes flash { 0%, 35% { background: #FFF6D6; } 100% { background: transparent; } }
+.empty { margin-top: 28px; border-radius: 18px; background: var(--soft); padding: 24px 20px; color: var(--muted); font-size: 16px; }
 .empty strong { display: block; color: var(--ink); font-size: 18px; margin-bottom: 4px; }
 
-/* Panier en ticket de caisse */
-.ticket-wrap { filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .10)); }
-.ticket {
-  background: var(--ticket); color: var(--ticket-ink); font: 14px/1.5 var(--mono); padding: 22px 20px 36px;
-  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 18px 100%;
-  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 18px 100%;
-}
-.ticket h2 { margin: 0; text-align: center; font: 600 14px var(--mono); letter-spacing: .14em; text-transform: uppercase; }
-.tdate { text-align: center; font-size: 12px; opacity: .7; text-transform: uppercase; font-variant-numeric: tabular-nums; }
-.rule { border: 0; border-top: 1.5px dashed currentColor; opacity: .35; margin: 12px 0; }
-.tlist { list-style: none; margin: 0; padding: 0; }
-.tline { width: 100%; display: flex; align-items: baseline; gap: 8px; padding: 6px 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; text-transform: uppercase; cursor: pointer; }
-.tline .n { overflow-wrap: anywhere; }
-.tline .lead { flex: 1; min-width: 16px; border-bottom: 1.5px dotted currentColor; opacity: .4; transform: translateY(-4px); }
-.tline .t { flex: none; font-variant-numeric: tabular-nums; }
-.tlist li.print { animation: print .5s cubic-bezier(.2, .8, .2, 1); }
-@keyframes print { from { opacity: 0; transform: translateY(-6px); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
-.tfoot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.total { font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
-.btn-clear { border: 0; border-radius: 10px; padding: 10px 14px; background: var(--ticket-ink); color: var(--ticket); font: 700 14px var(--body); cursor: pointer; }
-.thint { margin: 12px 0 0; text-align: center; font-size: 12px; opacity: .6; }
+/* Panier */
+.panier { position: sticky; bottom: 12px; z-index: 4; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--soft); border-radius: 16px; padding: 10px 10px 10px 18px; box-shadow: 0 0 0 6px var(--bg); }
+.panier span { font-size: 15px; }
+.btn-light { flex: none; border: 0; border-radius: 12px; background: var(--bg); color: var(--ink); font-size: 15px; font-weight: 700; padding: 10px 14px; cursor: pointer; }
 
 /* Compte */
-.account { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); text-align: center; }
+.account { margin-top: auto; padding-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); text-align: center; }
 .account p { margin: 0; }
-.account .linkish { font-size: 14px; }
-.rename { display: flex; gap: 8px; width: 100%; max-width: 360px; }
+.linkish { background: none; border: 0; padding: 4px 0; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; }
+.rename { display: flex; gap: 8px; width: 100%; max-width: 360px; margin: 6px 0; }
 .rename .field { height: 44px; }
-.rename .btn-primary { height: 44px; }
+.btn-primary { flex: none; height: 52px; padding: 0 18px; border: 0; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 16px; font-weight: 700; cursor: pointer; }
+.rename .btn-primary { height: 44px; border-radius: 14px; }
+.btn-primary:disabled { opacity: .6; cursor: default; }
 
-/* Écran de connexion */
-.login { max-width: 420px; margin: 0 auto; padding: 32px 16px 60px; display: flex; flex-direction: column; gap: 20px; }
+/* Connexion */
+.login { max-width: 420px; margin: 0 auto; padding: 40px 24px 60px; display: flex; flex-direction: column; gap: 22px; }
 .login .lead { margin: 0; color: var(--muted); font-size: 17px; }
-.login-form { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
-.login-form label { font-size: 14px; font-weight: 700; margin-top: 6px; }
+.login-form { display: flex; flex-direction: column; gap: 8px; }
+.login-form label { font-size: 14px; font-weight: 700; margin-top: 8px; }
 .login-form .field { flex: none; width: 100%; }
-.login-form .btn-primary { margin-top: 10px; width: 100%; }
-.login-form .linkish { align-self: center; margin-top: 4px; }
+.login-form .btn-primary { margin-top: 14px; width: 100%; }
+.login-form .linkish { align-self: center; margin-top: 4px; font-size: 15px; }
+.swatch { display: flex; gap: 8px; }
+.swatch span { width: 10px; height: 10px; border-radius: 50%; }
 .msg { margin: 4px 0 0; font-size: 15px; }
 .msg.err { color: var(--danger); }
-.msg.ok { color: var(--accent); }
+.msg.ok { color: #23663A; }
 
 /* Toast */
-.toast {
-  position: fixed; left: 50%; bottom: 20px; z-index: 10;
-  transform: translate(-50%, 16px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
-  display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px);
-  background: var(--ink); color: var(--paper); border-radius: 14px; padding: 8px 8px 8px 16px; font-size: 15px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .4);
-}
+.toast { position: fixed; left: 50%; bottom: 20px; z-index: 10; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); background: var(--ink); color: #FFFFFF; border-radius: 14px; padding: 8px 8px 8px 16px; font-size: 15px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .35); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
-.toast button { flex: none; background: none; border: 0; color: var(--fresh); font: 700 15px var(--body); padding: 8px 10px; cursor: pointer; }
+.toast button { flex: none; background: none; border: 0; color: #AEB6FF; font-size: 15px; font-weight: 700; padding: 8px 10px; cursor: pointer; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -219,8 +152,9 @@ h1 {
 
 <p class="boot" id="boot">Chargement de la liste…</p>
 
-<!-- Écran de connexion -->
+<!-- Connexion -->
 <section class="login" id="login" hidden aria-labelledby="login-h">
+  <div class="swatch" aria-hidden="true"><span style="background:#2E9E4F"></span><span style="background:#2F74E0"></span><span style="background:#C27A00"></span><span style="background:#7A56E8"></span></div>
   <h1 id="login-h">Courses</h1>
   <p class="lead">La liste partagée de la maison. Connectez-vous avec l'identifiant créé pour vous.</p>
   <form class="login-form" id="login-form" novalidate>
@@ -241,7 +175,7 @@ h1 {
 <main class="wrap" id="app" hidden>
   <header>
     <div class="top">
-      <span class="eyebrow" id="today"></span>
+      <p class="date" id="today"></p>
       <span class="pill" id="pill" data-s="connecting" role="status"><span class="dot" aria-hidden="true"></span><span id="pill-text">Connexion…</span></span>
     </div>
     <h1>Courses</h1>
@@ -252,41 +186,27 @@ h1 {
     <form class="add" id="add-form" autocomplete="off">
       <label for="add-input" class="sr">Article à ajouter</label>
       <input class="field" id="add-input" type="text" maxlength="80" placeholder="Ajouter un article…" enterkeyhint="done" autocapitalize="sentences">
-      <button class="btn-primary" type="submit">Ajouter</button>
+      <button class="btn-add" type="submit" aria-label="Ajouter"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
     </form>
     <div class="chips" id="chips" hidden><span class="chips-label" id="chips-label">Racheter</span></div>
   </div>
 
   <div class="notice" id="notice" role="alert" hidden></div>
-
   <div class="notice install" data-install hidden>
     <p>Pour l'installer, touchez <b>Partager</b> puis <b>Sur l'écran d'accueil</b>. Ouvrez-la ensuite depuis son icône et reconnectez-vous une fois.</p>
     <button class="linkish" type="button" data-install-close>OK</button>
   </div>
 
-  <section aria-labelledby="todo-h">
-    <h2 class="sec" id="todo-h">À acheter</h2>
-    <ul class="list" id="todo" hidden></ul>
-    <div class="empty" id="empty">
-      <strong id="empty-title">Chargement…</strong>
-      <span id="empty-text">La liste arrive.</span>
-    </div>
-  </section>
+  <div class="rayons" id="rayons"></div>
+  <div class="empty" id="empty">
+    <strong id="empty-title">Chargement…</strong>
+    <span id="empty-text">La liste arrive.</span>
+  </div>
 
-  <section class="ticket-wrap" id="basket" aria-labelledby="basket-h" hidden>
-    <div class="ticket">
-      <h2 id="basket-h">Dans le panier</h2>
-      <div class="tdate" id="tdate"></div>
-      <hr class="rule">
-      <ul class="tlist" id="done"></ul>
-      <hr class="rule">
-      <div class="tfoot">
-        <span class="total" id="total"></span>
-        <button class="btn-clear" id="clear-btn" type="button">Vider le panier</button>
-      </div>
-      <p class="thint">Touchez une ligne pour la remettre dans la liste.</p>
-    </div>
-  </section>
+  <div class="panier" id="panier" hidden>
+    <span id="panier-text"></span>
+    <button class="btn-light" id="clear-btn" type="button">Vider le panier</button>
+  </div>
 
   <footer class="account">
     <p><span id="me-line"></span> · <button class="linkish" id="rename-btn" type="button">Changer</button></p>
@@ -326,6 +246,7 @@ import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
   collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDoc, writeBatch, increment,
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { RAYONS, rayonDe, norm } from "./rayons.js";
 
 /* ---------- Firebase ---------- */
 const firebaseConfig = {
@@ -353,19 +274,20 @@ const els = {
   loginForm: $("login-form"), loginEmail: $("login-email"), loginPass: $("login-pass"), loginMsg: $("login-msg"), loginBtn: $("login-btn"), forgot: $("forgot-btn"),
   today: $("today"), pill: $("pill"), pillText: $("pill-text"), summary: $("summary"),
   form: $("add-form"), input: $("add-input"), chips: $("chips"), chipsLabel: $("chips-label"),
-  notice: $("notice"), todo: $("todo"), empty: $("empty"), emptyTitle: $("empty-title"), emptyText: $("empty-text"),
-  basket: $("basket"), tdate: $("tdate"), done: $("done"), total: $("total"), clear: $("clear-btn"),
+  notice: $("notice"), rayons: $("rayons"), empty: $("empty"), emptyTitle: $("empty-title"), emptyText: $("empty-text"),
+  panier: $("panier"), panierText: $("panier-text"), clear: $("clear-btn"),
   meLine: $("me-line"), meEmail: $("me-email"), renameBtn: $("rename-btn"), renameForm: $("rename-form"), renameInput: $("rename-input"), logout: $("logout-btn"),
   toast: $("toast"), toastMsg: $("toast-msg"), toastUndo: $("toast-undo"),
 };
 
-const IDEAS = ["Lait", "Pain", "Œufs", "Beurre", "Fruits", "Légumes", "Café", "Papier toilette"];
+const IDEAS = ["Lait", "Pain", "Œufs", "Beurre", "Tomates", "Pâtes", "Café", "Papier toilette"];
+const RAYON_PAR_ID = Object.fromEntries(RAYONS.map((r) => [r.id, r]));
 
 const state = {
   user: null, unsubs: [],
   items: new Map(), loaded: false,
   members: {}, history: {},
-  prevSeen: null, printed: new Set(), flash: null, undo: null,
+  prevSeen: null, flash: null, undo: null,
 };
 
 /* ---------- Petits outils ---------- */
@@ -375,7 +297,6 @@ const seenKey = () => "nos-courses.vu." + (state.user ? state.user.uid : "");
 function markSeen() { if (state.user && state.loaded) lsSet(seenKey(), String(Date.now())); }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") markSeen(); });
 
-const norm = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
 const clean = (s) => String(s).replace(/\s+/g, " ").trim().slice(0, 80);
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const plural = (n, one, many) => (n > 1 ? many : one);
@@ -401,12 +322,7 @@ function rel(t) {
   if (sameDay(dt, now)) return "aujourd'hui à " + hhmm(t);
   const y = new Date(now); y.setDate(now.getDate() - 1);
   if (sameDay(dt, y)) return "hier à " + hhmm(t);
-  return dt.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
-}
-function receiptTime(t) {
-  if (!t) return "";
-  const dt = new Date(t);
-  return sameDay(dt, new Date()) ? hhmm(t) : dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+  return dt.toLocaleDateString("fr-FR", { weekday: "long" }) + (d < 6 * 864e5 ? "" : " " + dt.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }));
 }
 
 function guessName(email) {
@@ -418,7 +334,7 @@ function who(uid) {
   if (uid && state.user && uid === state.user.uid) return "vous";
   return (uid && state.members[uid]) || "l'autre";
 }
-const isNew = (it) => state.prevSeen != null && it.par && state.user && it.par !== state.user.uid && it.le > state.prevSeen;
+const isNew = (it) => !it.fait && state.prevSeen != null && it.par && state.user && it.par !== state.user.uid && it.le > state.prevSeen;
 
 /* ---------- Statut, messages, toast ---------- */
 const STATUS = { connecting: "Connexion…", live: "Synchronisée", sending: "Envoi…", offline: "Hors ligne", error: "Erreur" };
@@ -507,38 +423,41 @@ function clearBasket() {
 function flash(id) {
   state.flash = id;
   render();
-  const row = els.todo.querySelector('li[data-id="' + CSS.escape(id) + '"]');
+  const row = els.rayons.querySelector('li[data-id="' + CSS.escape(id) + '"]');
   if (row) row.scrollIntoView({ block: "nearest" });
   setTimeout(() => { if (state.flash === id) state.flash = null; }, 1500);
 }
 
 /* ---------- Affichage ---------- */
 const X_ICON = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>';
+const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
-function rowTodo(it) {
-  const li = el("li", { class: "row" + (state.flash === it.id ? " flash" : "") });
+function row(it, rayon) {
+  const li = el("li", { class: "item" + (it.fait ? " done" : "") + (state.flash === it.id ? " flash" : "") });
   li.dataset.id = it.id;
-  const main = el("button", { class: "main", type: "button", role: "checkbox", "aria-checked": "false" });
-  main.dataset.id = it.id; main.dataset.role = "toggle";
+  const check = el("button", {
+    class: "check", type: "button", role: "checkbox", "aria-checked": it.fait ? "true" : "false",
+    "aria-label": it.fait ? "Remettre " + it.nom + " dans la liste" : "Mettre " + it.nom + " dans le panier",
+  });
+  check.dataset.id = it.id; check.dataset.role = "toggle";
+  check.style.color = rayon.ring;
+  const ring = el("span", { class: "ring", "aria-hidden": "true" });
+  if (it.fait) ring.innerHTML = CHECK_ICON;
+  check.append(ring);
+
+  const txt = el("div", { class: "txt" });
   const meta = el("span", { class: "meta" });
   if (isNew(it)) meta.append(el("span", { class: "new" }, "Nouveau"));
-  meta.append(document.createTextNode("Ajouté par " + who(it.par) + (it.le ? " · " + rel(it.le) : "")));
-  const txt = el("span", { class: "txt" });
+  meta.append(document.createTextNode(it.fait
+    ? "Dans le panier"
+    : cap(who(it.par)) + (it.le ? " · " + rel(it.le) : "")));
   txt.append(el("span", { class: "name" }, it.nom), meta);
-  main.append(el("span", { class: "box", "aria-hidden": "true" }), txt);
+
   const del = el("button", { class: "del", type: "button", "aria-label": "Supprimer " + it.nom });
   del.dataset.id = it.id; del.dataset.role = "del";
   del.innerHTML = X_ICON;
-  li.append(main, del);
-  return li;
-}
 
-function rowDone(it) {
-  const li = el("li", { class: state.printed.has(it.id) ? "print" : null });
-  const b = el("button", { class: "tline", type: "button", "aria-label": "Remettre " + it.nom + " dans la liste" });
-  b.dataset.id = it.id; b.dataset.role = "untoggle";
-  b.append(el("span", { class: "n" }, it.nom), el("span", { class: "lead", "aria-hidden": "true" }), el("span", { class: "t" }, receiptTime(it.faitLe)));
-  li.append(b);
+  li.append(check, txt, del);
   return li;
 }
 
@@ -554,7 +473,7 @@ function renderChips(todoKeys) {
   for (const n of names) {
     const c = el("button", { class: "chip", type: "button", "aria-label": "Ajouter " + n });
     c.dataset.name = n;
-    c.append(el("span", { "aria-hidden": "true" }, "+"), document.createTextNode(n));
+    c.append(el("span", { "aria-hidden": "true" }, "+"), document.createTextNode(" " + n));
     els.chips.append(c);
   }
   els.chips.hidden = !state.loaded || names.length === 0;
@@ -573,16 +492,37 @@ function render() {
   const focus = a && a.dataset && a.dataset.id ? { id: a.dataset.id, role: a.dataset.role } : null;
 
   const all = [...state.items.values()];
-  const todo = all.filter((i) => !i.fait).sort((x, y) => y.le - x.le);
-  const done = all.filter((i) => i.fait).sort((x, y) => x.faitLe - y.faitLe);
+  const todo = all.filter((i) => !i.fait);
+  const done = all.filter((i) => i.fait);
 
   els.summary.replaceChildren();
-  if (todo.length) els.summary.append(el("b", null, String(todo.length)), document.createTextNode(" " + plural(todo.length, "article", "articles") + " à acheter"));
+  if (todo.length) els.summary.append(el("b", null, String(todo.length)), document.createTextNode(" à acheter"));
   else els.summary.append(document.createTextNode("Rien à acheter"));
   if (done.length) els.summary.append(document.createTextNode(" · "), el("b", null, String(done.length)), document.createTextNode(" dans le panier"));
 
-  els.todo.replaceChildren(...todo.map(rowTodo));
-  els.todo.hidden = todo.length === 0;
+  // Regroupement par rayon, dans l'ordre d'un parcours en magasin.
+  const groupes = new Map(RAYONS.map((r) => [r.id, []]));
+  for (const it of all) groupes.get(RAYON_PAR_ID[it.rayon] ? it.rayon : "autres").push(it);
+  const sections = [];
+  for (const r of RAYONS) {
+    const list = groupes.get(r.id);
+    if (!list.length) continue;
+    list.sort((x, y) => (x.fait - y.fait) || x.nom.localeCompare(y.nom, "fr", { sensitivity: "base" }));
+    const sec = el("section", { class: "rayon", "aria-labelledby": "r-" + r.id });
+    const h = el("h2", { id: "r-" + r.id });
+    h.style.color = r.ink;
+    const dot = el("span", { class: "dot", "aria-hidden": "true" });
+    dot.style.background = r.ring;
+    const restants = list.filter((i) => !i.fait).length;
+    h.append(dot, document.createTextNode(r.nom), el("span", { class: "count" }, restants ? String(restants) : "✓"));
+    const ul = el("ul", { class: "items" });
+    ul.append(...list.map((it) => row(it, r)));
+    sec.append(h, ul);
+    sections.push(sec);
+  }
+  els.rayons.replaceChildren(...sections);
+  els.rayons.hidden = sections.length === 0;
+
   els.empty.hidden = todo.length > 0;
   if (!todo.length) {
     if (done.length) {
@@ -590,19 +530,14 @@ function render() {
       els.emptyText.textContent = "Videz le panier une fois les courses rangées.";
     } else {
       els.emptyTitle.textContent = "Rien à acheter pour l'instant.";
-      els.emptyText.textContent = "Ce que vous ajoutez apparaît aussi sur le téléphone de l'autre.";
+      els.emptyText.textContent = "Ce que vous ajoutez apparaît aussi sur le téléphone de l'autre, rangé par rayon.";
     }
   }
 
-  els.basket.hidden = done.length === 0;
-  if (done.length) {
-    els.tdate.textContent = now.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" });
-    els.done.replaceChildren(...done.map(rowDone));
-    els.total.textContent = "Articles : " + done.length;
-  }
-  state.printed.clear();
+  els.panier.hidden = done.length === 0;
+  els.panierText.replaceChildren(el("b", null, String(done.length)), document.createTextNode(" " + plural(done.length, "article", "articles") + " dans le panier"));
 
-  renderChips(new Set(todo.map((i) => norm(i.nom))));
+  renderChips(new Set(all.map((i) => norm(i.nom))));
 
   if (focus) {
     const n = document.querySelector('[data-id="' + CSS.escape(focus.id) + '"][data-role="' + focus.role + '"]');
@@ -618,27 +553,25 @@ function startSync(user) {
   setStatus(navigator.onLine === false ? "offline" : "connecting");
 
   state.unsubs.push(onSnapshot(articles(), { includeMetadataChanges: true }, (snap) => {
-    const old = state.items;
     const map = new Map();
     snap.forEach((d) => {
       const v = d.data();
       if (!v || typeof v.nom !== "string" || !v.nom.trim()) return;
-      const it = {
-        id: d.id, nom: clean(v.nom), fait: v.fait === true,
+      const nom = clean(v.nom);
+      map.set(d.id, {
+        id: d.id, nom, fait: v.fait === true,
+        rayon: typeof v.rayon === "string" && RAYON_PAR_ID[v.rayon] ? v.rayon : rayonDe(nom),
         par: typeof v.par === "string" ? v.par : null, le: Number(v.le) || 0,
         faitLe: Number(v.faitLe) || 0, faitPar: typeof v.faitPar === "string" ? v.faitPar : null,
         raw: v,
-      };
-      const was = old.get(d.id);
-      if (state.loaded && it.fait && was && !was.fait) state.printed.add(d.id);
-      map.set(d.id, it);
+      });
     });
     const firstLoad = !state.loaded;
     state.items = map;
     state.loaded = true;
     if (snap.metadata.hasPendingWrites) setStatus("sending");
     else if (snap.metadata.fromCache) setStatus("offline");
-    else { setStatus("live"); if (els.notice.dataset.kind !== "keep") clearNotice(); }
+    else { setStatus("live"); clearNotice(); }
     if (firstLoad && !snap.metadata.fromCache) markSeen();
     render();
   }, (err) => {
@@ -757,19 +690,13 @@ els.chips.addEventListener("click", (e) => {
   const c = e.target.closest(".chip");
   if (c) addItem(c.dataset.name);
 });
-els.todo.addEventListener("click", (e) => {
+els.rayons.addEventListener("click", (e) => {
   const b = e.target.closest("button[data-role]");
   if (!b) return;
   const it = state.items.get(b.dataset.id);
   if (!it) return;
-  if (b.dataset.role === "toggle") toggle(it, true);
+  if (b.dataset.role === "toggle") toggle(it, !it.fait);
   else if (b.dataset.role === "del") removeItem(it);
-});
-els.done.addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-role='untoggle']");
-  if (!b) return;
-  const it = state.items.get(b.dataset.id);
-  if (it) toggle(it, false);
 });
 els.clear.addEventListener("click", clearBasket);
 
