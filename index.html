@@ -57,6 +57,7 @@
   --danger: #B42318;
   --toast-bg: #1B1D22; --toast-ink: #FFFFFF; --toast-link: #AEB6FF;
   --seg-on: #FFFFFF;
+  --lieu-bg: #DDF5EF; --lieu-ink: #0F5F4F;
   --font: "Figtree", -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
@@ -87,6 +88,7 @@ html[data-mode="dark"] {
   --danger: #FF8A7A;
   --toast-bg: #ECEEF2; --toast-ink: #121418; --toast-link: #3442E0;
   --seg-on: #353A44;
+  --lieu-bg: #133A31; --lieu-ink: #7FE0C4;
   color-scheme: dark;
 }
 /* Couleurs d'un rayon : posées sur l'élément par le script, version claire ou sombre selon le mode. */
@@ -145,6 +147,7 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .jeton.j-vide { color: var(--faint); font-weight: 500; }
 .jeton.j-pour { background: var(--pour-bg); color: var(--pour-ink); box-shadow: none; }
 .jeton.j-urgent { background: var(--urg-bg); color: var(--urg-ink); box-shadow: none; }
+.jeton.j-lieu { background: var(--lieu-bg); color: var(--lieu-ink); box-shadow: none; }
 .rayon-choix .jeton { box-shadow: none; font-weight: 700; background: var(--c-tint); color: var(--c-ink); }
 .rayon-choix .jeton[aria-pressed="true"] { box-shadow: inset 0 0 0 2px currentColor; }
 .astuce { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
@@ -174,6 +177,8 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .pill-o { font-size: 12px; font-weight: 600; border-radius: 6px; padding: 2px 7px; background: var(--soft); color: var(--ink-2); }
 .pill-o.pour { background: var(--pour-bg); color: var(--pour-ink); }
 .pill-o.urgent { background: var(--urg-bg); color: var(--urg-ink); }
+.pill-o.lieu { background: var(--lieu-bg); color: var(--lieu-ink); display: inline-flex; align-items: center; gap: 3px; }
+.pill-o.lieu svg, .jeton.j-lieu svg.pin { width: 11px; height: 11px; flex: none; }
 .item.done .pill-o { opacity: .55; }
 .qui { font-size: 13px; color: var(--muted); }
 .name { font-size: 17px; font-weight: 500; overflow-wrap: anywhere; }
@@ -297,7 +302,7 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
       </div>
       <div class="jetons" id="jetons"></div>
       <div class="rayon-choix" id="rayon-choix" hidden></div>
-      <p class="astuce">Écrivez «&nbsp;2&nbsp;kg&nbsp;», «&nbsp;500&nbsp;g&nbsp;», «&nbsp;x3&nbsp;», «&nbsp;pour&nbsp;Prénom&nbsp;», «&nbsp;bio&nbsp;»… et «&nbsp;!&nbsp;» pour urgent. Touchez une étiquette pour la retirer.</p>
+      <p class="astuce">Écrivez «&nbsp;2&nbsp;kg&nbsp;», «&nbsp;500&nbsp;g&nbsp;», «&nbsp;x3&nbsp;», «&nbsp;pour&nbsp;Prénom&nbsp;», «&nbsp;chez&nbsp;Biocoop&nbsp;», «&nbsp;bio&nbsp;»… et «&nbsp;!&nbsp;» pour urgent. Touchez une étiquette pour la retirer.</p>
     </div>
   </div>
 
@@ -469,7 +474,7 @@ const state = {
   items: new Map(), loaded: false,
   members: {},
   prevSeen: null, flash: null, undo: null,
-  editing: null, draftRayon: null, rayonOuvert: false, personnes: {},
+  editing: null, draftRayon: null, rayonOuvert: false, personnes: {}, lieux: {},
 };
 
 /* ---------- Petits outils ---------- */
@@ -555,6 +560,12 @@ const send = (p) => { p.catch(firestoreError); };
 /* ---------- Actions ---------- */
 const articles = () => collection(db, "articles");
 
+function lieuxConnus() {
+  const set = new Set(Object.values(state.lieux || {}).filter((l) => typeof l === "string"));
+  state.items.forEach((i) => { if (i.lieu) set.add(i.lieu); });
+  return [...set];
+}
+
 function personnesConnues() {
   const set = new Set(Object.values(state.members));
   Object.values(state.personnes || {}).forEach((p) => { if (typeof p === "string") set.add(p); });
@@ -570,6 +581,7 @@ function donnees(p) {
     contenant: p.contenant || null,
     poids: p.poids || null,
     pour: p.pour || null,
+    lieu: p.lieu || null,
     precision: p.precision || null,
     urgent: !!p.urgent,
   };
@@ -585,10 +597,11 @@ function resetSaisie() {
 
 function addFromText(texte) {
   if (!state.user) return;
-  const p = parse(texte, personnesConnues());
+  const p = parse(texte, personnesConnues(), lieuxConnus());
   if (!p.nom) { els.input.focus(); return; }
   const data = donnees(p);
   if (p.pour) send(setDoc(doc(db, "meta", "historique"), { personnes: { [norm(p.pour)]: p.pour } }, { merge: true }));
+  if (p.lieu && norm(p.lieu)) send(setDoc(doc(db, "meta", "historique"), { lieux: { [norm(p.lieu)]: p.lieu } }, { merge: true }));
 
   if (state.editing) {
     const it = state.items.get(state.editing);
@@ -609,7 +622,7 @@ function addFromText(texte) {
   if (existing) {
     // Déjà sur la liste pour la même personne : on complète ses options avec ce qui vient d'être tapé.
     const patch = {};
-    for (const k of ["quantite", "contenant", "poids", "pour", "precision"]) if (data[k]) patch[k] = data[k];
+    for (const k of ["quantite", "contenant", "poids", "pour", "lieu", "precision"]) if (data[k]) patch[k] = data[k];
     if (data.urgent) patch.urgent = true;
     if (state.draftRayon) patch.rayon = state.draftRayon;
     if (existing.fait) Object.assign(patch, { fait: false, faitLe: null, faitPar: null });
@@ -690,6 +703,12 @@ function row(it, rayon) {
   if (it.quantite) pills.append(el("span", { class: "pill-o" }, libelleQuantite(it.quantite, it.contenant)));
   if (it.poids) pills.append(el("span", { class: "pill-o" }, it.poids));
   if (it.pour) pills.append(el("span", { class: "pill-o pour" }, "Pour " + it.pour));
+  if (it.lieu) {
+    const lieu = el("span", { class: "pill-o lieu", "aria-label": "À acheter : " + it.lieu });
+    lieu.insertAdjacentHTML("beforeend", PIN);
+    lieu.append(document.createTextNode(it.lieu));
+    pills.append(lieu);
+  }
   if (it.precision) pills.append(el("span", { class: "pill-o" }, it.precision));
   pills.append(el("span", { class: "qui" }, it.fait ? "Dans le panier" : cap(who(it.par)) + (it.le ? " · " + rel(it.le) : "")));
   txt.append(el("span", { class: "name" }, it.nom), pills);
@@ -703,6 +722,7 @@ function row(it, rayon) {
 }
 
 const CROIX = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>';
+const PIN = '<svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>';
 const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 
 // L'aperçu « L'app a compris », recalculé à chaque lettre tapée.
@@ -715,7 +735,7 @@ function renderSaisie() {
   els.comprisTitre.textContent = enCours ? "Modifier « " + enCours.nom + " »" : "L'app a compris";
   if (!actif) { els.jetons.replaceChildren(); els.rayonChoix.hidden = true; return; }
 
-  const p = parse(texte, personnesConnues());
+  const p = parse(texte, personnesConnues(), lieuxConnus());
   const rayonId = state.draftRayon || (p.nom ? rayonDe(p.nom) : "autres");
   const r = RAYON_PAR_ID[rayonId];
   const out = [];
@@ -730,6 +750,7 @@ function renderSaisie() {
   p.jetons.forEach((j, i) => {
     const b = el("button", { class: "jeton j-" + j.type, type: "button", "aria-label": "Retirer " + j.libelle });
     b.dataset.role = "retirer"; b.dataset.index = String(i);
+    if (j.type === "lieu") b.insertAdjacentHTML("beforeend", PIN);
     b.append(document.createTextNode(j.libelle));
     b.insertAdjacentHTML("beforeend", CROIX);
     out.push(b);
@@ -875,6 +896,7 @@ function startSync(user) {
         contenant: typeof v.contenant === "string" ? v.contenant.slice(0, 20) : null,
         poids: typeof v.poids === "string" ? v.poids.slice(0, 20) : null,
         pour: typeof v.pour === "string" ? v.pour.slice(0, 30) : null,
+        lieu: typeof v.lieu === "string" ? v.lieu.slice(0, 40) : null,
         precision: typeof v.precision === "string" ? v.precision.slice(0, 80) : null,
         urgent: v.urgent === true,
         par: typeof v.par === "string" ? v.par : null, le: Number(v.le) || 0,
@@ -906,6 +928,7 @@ function startSync(user) {
   state.unsubs.push(onSnapshot(doc(db, "meta", "historique"), (snap) => {
     const d = snap.exists() ? snap.data() : null;
     state.personnes = d && d.personnes && typeof d.personnes === "object" ? d.personnes : {};
+    state.lieux = d && d.lieux && typeof d.lieux === "object" ? d.lieux : {};
     render();
   }, () => { /* les prénoms déjà utilisés restent inconnus */ }));
 
@@ -922,6 +945,7 @@ function stopSync() {
   state.loaded = false;
   state.members = {};
   state.personnes = {};
+  state.lieux = {};
 }
 
 window.addEventListener("online", () => { if (state.user && els.pill.dataset.s === "offline") setStatus("connecting"); });
@@ -1062,7 +1086,7 @@ try { localStorage.removeItem("nos-courses.pastille"); } catch (e) { /* rien */ 
 
 /* ---------- Mises à jour de l'app ---------- */
 // À chaque publication, ce numéro et celui de version.json changent ensemble.
-const APP_VERSION = "2026-11-20-18h40";
+const APP_VERSION = "2026-11-20-20h35";
 {
   const m = APP_VERSION.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})h(\d{2})$/);
   els.versionVal.textContent = m ? m[3] + "/" + m[2] + "/" + m[1] + " · " + m[4] + "h" + m[5] : APP_VERSION;

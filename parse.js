@@ -1,5 +1,5 @@
 // Nos courses : la saisie intelligente.
-// « 6 yaourts nature pour Nicolas ! » → nom « Yaourts nature », ×6, pour Nicolas, urgent.
+// « 6 yaourts nature pour Nicolas chez Biocoop ! » → nom « Yaourts nature », ×6, pour Nicolas, chez Biocoop, urgent.
 // Chaque élément reconnu garde la place qu'il occupe dans le texte tapé,
 // pour qu'on puisse le retirer en touchant son étiquette.
 
@@ -13,6 +13,21 @@ const CONTENANTS = {
   rouleau: "rouleau", tablette: "tablette", canette: "canette", bocal: "bocal", boule: "boule", part: "part",
 };
 const ETIQUETTES = ["bio", "sans lactose", "sans gluten", "sans sucre", "vegan", "végan", "végétarien", "allégé", "allégée", "light"];
+
+// Lieux d'achat reconnus après « à », « au », « à la »… (après « chez » ou « @ », tout mot est accepté).
+const LIEUX_CONNUS = [
+  "marché", "marché bio", "supermarché", "hypermarché", "boulangerie", "boucherie", "charcuterie", "poissonnerie",
+  "fromagerie", "pharmacie", "parapharmacie", "primeur", "caviste", "drive", "épicerie", "épicerie fine", "traiteur",
+  "Carrefour", "Carrefour City", "Carrefour Market", "Leclerc", "Monoprix", "Monop", "Franprix", "Lidl", "Aldi",
+  "Intermarché", "Auchan", "Picard", "Biocoop", "Naturalia", "La Vie Claire", "Grand Frais", "Casino", "Super U",
+  "Hyper U", "Système U", "G20", "Leader Price", "Ikea", "Action", "Décathlon", "Grande Épicerie", "Cora", "Netto",
+  "Thiriet", "Metro", "Bio c' Bon", "Marks & Spencer",
+];
+const ACCENTS = { a: "[aàâä]", e: "[eéèêë]", i: "[iîï]", o: "[oôö]", u: "[uùûü]", c: "[cç]", y: "[yÿ]" };
+// Motif tolérant aux accents et aux majuscules : « grand frais » trouve « Grand Frais ».
+function motifSouple(texte) {
+  return [...norm(texte)].map((ch) => (ch === " " ? "[\\s'’&.-]*" : ACCENTS[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))).join("");
+}
 
 const LETTRE = /[A-Za-zÀ-ÖØ-öø-ÿŒœ]/;
 const estLettre = (c) => !!c && LETTRE.test(c);
@@ -29,12 +44,21 @@ export function libelleQuantite(quantite, contenant) {
   return contenant ? quantite + " " + pluriel(contenant, quantite) : "×" + quantite;
 }
 
-export function parse(saisie, personnesConnues) {
+export function parse(saisie, personnesConnues, lieuxConnus) {
   const src = String(saisie || "");
   const connues = new Set((personnesConnues || []).map((p) => norm(p)));
+  const lieux = [...new Map([...LIEUX_CONNUS, ...(lieuxConnus || [])].filter(Boolean).map((l) => [norm(l), l])).values()]
+    .sort((a, b) => norm(b).length - norm(a).length);
+  const motifLieux = lieux.map(motifSouple).join("|");
+  const nomDuLieu = (texte) => {
+    const n = norm(texte);
+    const connu = lieux.find((l) => norm(l) === n);
+    const t = (connu || texte).replace(/\s+/g, " ").trim();
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  };
   const pris = [];
   const jetons = [];
-  const res = { nom: "", quantite: null, contenant: null, poids: null, pour: null, precision: null, urgent: false, jetons };
+  const res = { nom: "", quantite: null, contenant: null, poids: null, pour: null, lieu: null, precision: null, urgent: false, jetons };
 
   const libre = (s, e) => !pris.some(([a, b]) => s < b && e > a);
   const prendre = (plages) => { for (const p of plages) pris.push(p); };
@@ -163,7 +187,27 @@ export function parse(saisie, personnesConnues) {
     jetons.push({ type: "pour", libelle: "Pour " + res.pour, plages: [[s, e]] });
   });
 
-  // 7. Étiquettes courantes : « bio », « sans lactose »…
+  // 7. Lieu d'achat : « chez Paul », « chez le boucher », « @Picard », « à Biocoop », « au marché ».
+  const poserLieu = (texte, s, e) => {
+    res.lieu = nomDuLieu(texte).slice(0, 40);
+    pris.push([s, e]);
+    jetons.push({ type: "lieu", libelle: res.lieu, plages: [[s, e]] });
+  };
+  const MOT = "[A-Za-zÀ-ÖØ-öø-ÿ0-9][A-Za-zÀ-ÖØ-öø-ÿ0-9'’.&-]*";
+  let lieuTrouve = false;
+  if (motifLieux) {
+    lieuTrouve = chercher(new RegExp("(?:@\\s*|chez\\s+)(" + motifLieux + ")", "gi"), (mm, s, e) => poserLieu(mm[1], s, e));
+  }
+  if (!lieuTrouve) {
+    lieuTrouve = chercher(new RegExp("@\\s*(" + MOT + ")|chez\\s+((?:le|la|les)\\s+" + MOT + "|l['’]\\s*" + MOT + "|" + MOT + ")", "gi"),
+      (mm, s, e) => poserLieu(mm[1] || mm[2], s, e));
+  }
+  if (!lieuTrouve && motifLieux) {
+    chercher(new RegExp("(?:[àa]\\s+la\\s+|[àa]\\s+l['’]\\s*|aux?\\s+|[àa]\\s+)(" + motifLieux + ")", "gi"),
+      (mm, s, e) => poserLieu(mm[1], s, e));
+  }
+
+  // 8. Étiquettes courantes : « bio », « sans lactose »…
   for (const etiquette of ETIQUETTES) {
     const re = new RegExp(etiquette.replace(/ /g, "\\s+"), "gi");
     chercher(re, (mm, s, e) => {
@@ -177,7 +221,7 @@ export function parse(saisie, personnesConnues) {
     jetons.push({ type: "precision", libelle: res.precision, plages: plagesPrecision });
   }
 
-  // 8. Le nom : tout ce qui reste.
+  // 9. Le nom : tout ce qui reste.
   let nom = "";
   for (let i = 0; i < src.length; i++) nom += libre(i, i + 1) ? src[i] : " ";
   nom = nom
@@ -190,7 +234,7 @@ export function parse(saisie, personnesConnues) {
     .slice(0, 80);
   res.nom = nom ? nom.charAt(0).toUpperCase() + nom.slice(1) : "";
 
-  const ordre = { quantite: 1, poids: 2, pour: 3, precision: 4, urgent: 5 };
+  const ordre = { quantite: 1, poids: 2, pour: 3, lieu: 4, precision: 5, urgent: 6 };
   jetons.sort((a, b) => ordre[a.type] - ordre[b.type]);
   return res;
 }
@@ -210,6 +254,7 @@ export function enTexte(article) {
   morceaux.push(article.nom);
   if (article.poids) morceaux.push(article.poids);
   if (article.pour) morceaux.push("pour " + article.pour);
+  if (article.lieu) morceaux.push("chez " + article.lieu.replace(/^(Le|La|Les|L['’])(?=\s|['’])/, (m) => m.toLowerCase()));
   let t = morceaux.join(" ");
   if (article.precision) t += ", " + article.precision;
   if (article.urgent) t += " !";

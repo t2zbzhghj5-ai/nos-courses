@@ -66,6 +66,7 @@ const CATALOGUE = {
     "deodorant", "coton", "coton tige", "rasoir", "mousse a raser", "creme hydratante", "creme solaire",
     "serviette hygienique", "tampon", "protege slip", "couche", "lingette", "papier alu", "aluminium",
     "film alimentaire", "sac congelation", "ampoule", "pile", "allumette", "bougie", "croquette", "litiere",
+    "doliprane", "paracetamol", "ibuprofene", "medicament", "pansement", "serum physiologique", "thermometre",
   ],
 };
 
