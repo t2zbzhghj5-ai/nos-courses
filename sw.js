@@ -1,6 +1,6 @@
 // Nos courses : garde l'app sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Les données de la liste ne passent pas par ici : Firestore les met lui-même en cache.
-const CACHE = "nos-courses-v7";
+const CACHE = "nos-courses-v8";
 const SHELL = ["./", "./index.html", "./rayons.js", "./parse.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
@@ -22,7 +22,8 @@ function networkFirst(request) {
     const finish = (res) => { if (!settled) { settled = true; resolve(res); } };
     const fallback = () => cache.match(request, { ignoreSearch: true }).then((hit) => hit || cache.match("./index.html"));
     const timer = setTimeout(() => { fallback().then((hit) => { if (hit) finish(hit); }); }, 3000);
-    fetch(request)
+    // « no-cache » : on redemande toujours au serveur s'il y a du neuf, au lieu de se fier au cache du navigateur.
+    fetch(request, { cache: "no-cache" })
       .then((res) => {
         clearTimeout(timer);
         if (res.ok) cache.put(request, res.clone());

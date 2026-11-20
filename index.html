@@ -150,6 +150,9 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 /* Messages */
 .notice { margin-top: 16px; background: var(--note-bg); border-radius: 14px; padding: 12px 14px; font-size: 15px; color: var(--note-ink); }
 .install { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.maj { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.maj p { margin: 0; font-weight: 600; }
+.btn-light:disabled { opacity: .6; }
 .install p { margin: 0; }
 
 /* Rayons */
@@ -276,6 +279,10 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
   </div>
 
   <div class="notice" id="notice" role="alert" hidden></div>
+  <div class="notice maj" id="maj" role="status" hidden>
+    <p>Une nouvelle version de l'app est prête.</p>
+    <button class="btn-light" id="maj-btn" type="button">Mettre à jour</button>
+  </div>
   <div class="notice install" data-install hidden>
     <p>Pour l'installer, touchez <b>Partager</b> puis <b>Sur l'écran d'accueil</b>. Ouvrez-la ensuite depuis son icône et reconnectez-vous une fois.</p>
     <button class="linkish" type="button" data-install-close>OK</button>
@@ -306,6 +313,7 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
       <button class="btn-primary" type="submit">OK</button>
     </form>
     <p><span id="me-email"></span> · <button class="linkish" id="logout-btn" type="button">Se déconnecter</button></p>
+    <p><span id="version-line"></span> · <button class="linkish" id="maj-check" type="button">Rechercher une mise à jour</button></p>
   </footer>
 </main>
 
@@ -370,6 +378,7 @@ const els = {
   panier: $("panier"), panierText: $("panier-text"), clear: $("clear-btn"),
   meLine: $("me-line"), meEmail: $("me-email"), renameBtn: $("rename-btn"), renameForm: $("rename-form"), renameInput: $("rename-input"), logout: $("logout-btn"),
   toast: $("toast"), toastMsg: $("toast-msg"), toastUndo: $("toast-undo"),
+  maj: $("maj"), majBtn: $("maj-btn"), majCheck: $("maj-check"), versionLine: $("version-line"),
 };
 
 const RAYON_PAR_ID = Object.fromEntries(RAYONS.map((r) => [r.id, r]));
@@ -961,6 +970,43 @@ document.querySelectorAll("[data-install-close]").forEach((b) => b.addEventListe
 }));
 
 setInterval(() => { if (state.loaded) render(); }, 60000);
+
+/* ---------- Mises à jour de l'app ---------- */
+// À chaque publication, ce numéro et celui de version.json changent ensemble.
+const APP_VERSION = "2026-11-20-17h30";
+{
+  const m = APP_VERSION.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})h(\d{2})$/);
+  els.versionLine.textContent = m ? "Version du " + m[3] + "/" + m[2] + "/" + m[1] + " à " + m[4] + "h" + m[5] : "Version " + APP_VERSION;
+}
+async function versionEnLigne() {
+  try {
+    const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && typeof j.version === "string" ? j.version : null;
+  } catch (e) { return null; }
+}
+function mettreAJour() {
+  els.majBtn.disabled = true;
+  els.majBtn.textContent = "Mise à jour…";
+  markSeen();
+  const sw = navigator.serviceWorker && navigator.serviceWorker.getRegistration ? navigator.serviceWorker.getRegistration() : Promise.resolve(null);
+  sw.then((reg) => (reg ? reg.update() : null)).catch(() => {}).finally(() => window.location.reload());
+}
+async function verifierMaj(manuel) {
+  const v = await versionEnLigne();
+  if (v && v !== APP_VERSION) {
+    els.maj.hidden = false;
+    if (manuel) mettreAJour();
+  } else if (manuel) {
+    toast(v ? "Vous avez déjà la dernière version." : "Vérification impossible : pas de connexion internet.");
+  }
+}
+els.majBtn.addEventListener("click", mettreAJour);
+els.majCheck.addEventListener("click", () => verifierMaj(true));
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") verifierMaj(false); });
+setTimeout(() => verifierMaj(false), 4000);
+setInterval(() => { if (document.visibilityState === "visible") verifierMaj(false); }, 15 * 60e3);
 </script>
 </body>
 </html>
