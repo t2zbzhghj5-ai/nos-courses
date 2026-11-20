@@ -17,6 +17,10 @@ Les articles sont rangés automatiquement par rayon grâce au catalogue de `rayo
 
 | Collection | Contenu |
 |---|---|
-| `articles/{id}` | `nom`, `fait`, `par` (UID), `le` (horodatage), `faitLe`, `faitPar` |
+| `articles/{id}` | `nom`, `quantite`, `contenant`, `poids`, `pour`, `precision`, `urgent`, `rayon` (choisi à la main, sinon déduit du nom), `fait`, `par` (UID), `le` (horodatage), `faitLe`, `faitPar` |
 | `membres/{uid}` | `prenom` affiché à l'autre personne |
-| `meta/historique` | `noms` : articles déjà achetés, pour les rajouter en un geste |
+| `meta/historique` | `noms` : articles déjà achetés, pour les rajouter en un geste ; `personnes` : prénoms déjà utilisés après « pour » |
+
+## Saisie intelligente
+
+`parse.js` lit ce qui est tapé dans la barre d'ajout : « 6 yaourts nature pour Nicolas ! » donne l'article « Yaourts nature », ×6, pour Nicolas, urgent. Il reconnaît les nombres (« 3 », « x3 », « deux », « une douzaine », « 2 paquets de »), les poids et volumes (« 500 g », « 1,5 kg », « 1 L », « 33 cl »), « pour Prénom » (avec une majuscule, ou un prénom déjà utilisé), les précisions (« bio », « sans lactose », le texte après une virgule ou entre parenthèses) et l'urgence (« ! » ou « urgent »). Toucher un article remet son texte dans la barre pour le modifier.

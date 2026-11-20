@@ -80,6 +80,22 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .chip { flex: none; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: 15px; color: var(--ink); cursor: pointer; }
 .chip span { color: var(--accent); font-weight: 700; }
 
+/* Saisie intelligente */
+.compris { margin-top: 12px; background: #F7F8FB; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.compris-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 20px; }
+.compris-titre { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.compris-top .linkish { padding: 0; }
+.jetons, .rayon-choix { display: flex; flex-wrap: wrap; gap: 6px; }
+.jeton { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; border: 0; border-radius: 8px; padding: 5px 9px 5px 10px; font-size: 14px; font-weight: 600; cursor: pointer; background: #FFFFFF; color: #4A4F5C; box-shadow: inset 0 0 0 1px var(--line); }
+.jeton svg { width: 12px; height: 12px; flex: none; }
+.jeton.j-nom { font-weight: 700; box-shadow: none; }
+.jeton.j-vide { color: var(--faint); font-weight: 500; }
+.jeton.j-pour { background: #E9EBFF; color: #2D3AD1; box-shadow: none; }
+.jeton.j-urgent { background: #FDE4E1; color: #B42318; box-shadow: none; }
+.rayon-choix .jeton { box-shadow: none; font-weight: 700; }
+.rayon-choix .jeton[aria-pressed="true"] { box-shadow: inset 0 0 0 2px currentColor; }
+.astuce { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+
 /* Messages */
 .notice { margin-top: 16px; background: #FFF6D6; border-radius: 14px; padding: 12px 14px; font-size: 15px; color: #5C4300; }
 .install { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
@@ -97,12 +113,17 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .check:active .ring { background: currentColor; }
 .item.done .ring { background: currentColor; }
 .ring svg { width: 13px; height: 13px; }
-.txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 4px 0; }
+.txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 6px 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.pills { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.pill-o { font-size: 12px; font-weight: 600; border-radius: 6px; padding: 2px 7px; background: var(--soft); color: #4A4F5C; }
+.pill-o.pour { background: #E9EBFF; color: #2D3AD1; }
+.pill-o.urgent { background: #FDE4E1; color: #B42318; }
+.item.done .pill-o { opacity: .55; }
+.qui { font-size: 13px; color: var(--muted); }
 .name { font-size: 17px; font-weight: 500; overflow-wrap: anywhere; }
-.meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 13px; color: var(--muted); }
 .new { background: var(--new-bg); color: var(--new-ink); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 5px; padding: 1px 6px; }
 .item.done .name { color: var(--faint); text-decoration: line-through; }
-.item.done .meta { color: var(--faint); }
+.item.done .qui { color: var(--faint); }
 .del { flex: none; width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: #B5BAC6; display: grid; place-items: center; cursor: pointer; }
 .del svg { width: 16px; height: 16px; }
 @media (hover: hover) { .del:hover { color: var(--danger); } }
@@ -185,9 +206,18 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
   <div class="composer">
     <form class="add" id="add-form" autocomplete="off">
       <label for="add-input" class="sr">Article à ajouter</label>
-      <input class="field" id="add-input" type="text" maxlength="80" placeholder="Ajouter un article…" enterkeyhint="done" autocapitalize="sentences">
+      <input class="field" id="add-input" type="text" maxlength="140" placeholder="Ajouter un article…" enterkeyhint="done" autocapitalize="sentences" autocorrect="on">
       <button class="btn-add" type="submit" aria-label="Ajouter"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
     </form>
+    <div class="compris" id="compris" hidden>
+      <div class="compris-top">
+        <span class="compris-titre" id="compris-titre">L'app a compris</span>
+        <button class="linkish" id="edit-cancel" type="button" hidden>Annuler</button>
+      </div>
+      <div class="jetons" id="jetons"></div>
+      <div class="rayon-choix" id="rayon-choix" hidden></div>
+      <p class="astuce">Écrivez «&nbsp;2&nbsp;kg&nbsp;», «&nbsp;500&nbsp;g&nbsp;», «&nbsp;x3&nbsp;», «&nbsp;pour&nbsp;Prénom&nbsp;», «&nbsp;bio&nbsp;»… et «&nbsp;!&nbsp;» pour urgent. Touchez une étiquette pour la retirer.</p>
+    </div>
     <div class="chips" id="chips" hidden><span class="chips-label" id="chips-label">Racheter</span></div>
   </div>
 
@@ -247,6 +277,7 @@ import {
   collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDoc, writeBatch, increment,
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { RAYONS, rayonDe, norm } from "./rayons.js";
+import { parse, retirer, enTexte, libelleQuantite } from "./parse.js";
 
 /* ---------- Firebase ---------- */
 const firebaseConfig = {
@@ -274,6 +305,7 @@ const els = {
   loginForm: $("login-form"), loginEmail: $("login-email"), loginPass: $("login-pass"), loginMsg: $("login-msg"), loginBtn: $("login-btn"), forgot: $("forgot-btn"),
   today: $("today"), pill: $("pill"), pillText: $("pill-text"), summary: $("summary"),
   form: $("add-form"), input: $("add-input"), chips: $("chips"), chipsLabel: $("chips-label"),
+  compris: $("compris"), comprisTitre: $("compris-titre"), jetons: $("jetons"), rayonChoix: $("rayon-choix"), editCancel: $("edit-cancel"),
   notice: $("notice"), rayons: $("rayons"), empty: $("empty"), emptyTitle: $("empty-title"), emptyText: $("empty-text"),
   panier: $("panier"), panierText: $("panier-text"), clear: $("clear-btn"),
   meLine: $("me-line"), meEmail: $("me-email"), renameBtn: $("rename-btn"), renameForm: $("rename-form"), renameInput: $("rename-input"), logout: $("logout-btn"),
@@ -288,6 +320,7 @@ const state = {
   items: new Map(), loaded: false,
   members: {}, history: {},
   prevSeen: null, flash: null, undo: null,
+  editing: null, draftRayon: null, rayonOuvert: false, personnes: {},
 };
 
 /* ---------- Petits outils ---------- */
@@ -373,17 +406,77 @@ const send = (p) => { p.catch(firestoreError); };
 /* ---------- Actions ---------- */
 const articles = () => collection(db, "articles");
 
-function addItem(raw) {
-  const name = clean(raw);
-  if (!name || !state.user) return;
-  const key = norm(name);
-  const existing = [...state.items.values()].find((i) => norm(i.nom) === key);
-  if (existing) {
-    if (existing.fait) toggle(existing, false);
-    flash(existing.id);
+function personnesConnues() {
+  const set = new Set(Object.values(state.members));
+  Object.values(state.personnes || {}).forEach((p) => { if (typeof p === "string") set.add(p); });
+  state.items.forEach((i) => { if (i.pour) set.add(i.pour); });
+  return [...set];
+}
+
+// Ce qui est enregistré pour un article : nom, options et rayon choisi à la main.
+function donnees(p) {
+  return {
+    nom: cap(clean(p.nom)),
+    quantite: p.quantite || null,
+    contenant: p.contenant || null,
+    poids: p.poids || null,
+    pour: p.pour || null,
+    precision: p.precision || null,
+    urgent: !!p.urgent,
+  };
+}
+
+function resetSaisie() {
+  els.input.value = "";
+  state.editing = null;
+  state.draftRayon = null;
+  state.rayonOuvert = false;
+  renderSaisie();
+}
+
+function addFromText(texte) {
+  if (!state.user) return;
+  const p = parse(texte, personnesConnues());
+  if (!p.nom) { els.input.focus(); return; }
+  const data = donnees(p);
+  if (p.pour) send(setDoc(doc(db, "meta", "historique"), { personnes: { [norm(p.pour)]: p.pour } }, { merge: true }));
+
+  if (state.editing) {
+    const it = state.items.get(state.editing);
+    if (it) {
+      data.rayon = state.draftRayon || (it.raw.rayon && RAYON_PAR_ID[it.raw.rayon] ? it.raw.rayon : null);
+      send(updateDoc(doc(db, "articles", it.id), data));
+      flash(it.id);
+    }
+    resetSaisie();
     return;
   }
-  send(setDoc(doc(articles()), { nom: cap(name), fait: false, par: state.user.uid, le: Date.now() }));
+
+  const key = norm(data.nom);
+  const existing = [...state.items.values()].find((i) => norm(i.nom) === key);
+  if (existing) {
+    // Déjà sur la liste : on complète ses options avec ce qui vient d'être tapé.
+    const patch = {};
+    for (const k of ["quantite", "contenant", "poids", "pour", "precision"]) if (data[k]) patch[k] = data[k];
+    if (data.urgent) patch.urgent = true;
+    if (state.draftRayon) patch.rayon = state.draftRayon;
+    if (existing.fait) Object.assign(patch, { fait: false, faitLe: null, faitPar: null });
+    if (Object.keys(patch).length) send(updateDoc(doc(db, "articles", existing.id), patch));
+    flash(existing.id);
+  } else {
+    send(setDoc(doc(articles()), { ...data, rayon: state.draftRayon || null, fait: false, par: state.user.uid, le: Date.now() }));
+  }
+  resetSaisie();
+}
+
+function startEdit(it) {
+  state.editing = it.id;
+  state.draftRayon = it.raw.rayon && RAYON_PAR_ID[it.raw.rayon] ? it.raw.rayon : null;
+  state.rayonOuvert = false;
+  els.input.value = enTexte(it);
+  renderSaisie();
+  els.input.focus();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function toggle(it, toDone) {
@@ -445,13 +538,17 @@ function row(it, rayon) {
   if (it.fait) ring.innerHTML = CHECK_ICON;
   check.append(ring);
 
-  const txt = el("div", { class: "txt" });
-  const meta = el("span", { class: "meta" });
-  if (isNew(it)) meta.append(el("span", { class: "new" }, "Nouveau"));
-  meta.append(document.createTextNode(it.fait
-    ? "Dans le panier"
-    : cap(who(it.par)) + (it.le ? " · " + rel(it.le) : "")));
-  txt.append(el("span", { class: "name" }, it.nom), meta);
+  const txt = el("button", { class: "txt", type: "button", "aria-label": "Modifier " + it.nom });
+  txt.dataset.id = it.id; txt.dataset.role = "edit";
+  const pills = el("span", { class: "pills" });
+  if (isNew(it)) pills.append(el("span", { class: "new" }, "Nouveau"));
+  if (it.urgent && !it.fait) pills.append(el("span", { class: "pill-o urgent" }, "Urgent"));
+  if (it.quantite) pills.append(el("span", { class: "pill-o" }, libelleQuantite(it.quantite, it.contenant)));
+  if (it.poids) pills.append(el("span", { class: "pill-o" }, it.poids));
+  if (it.pour) pills.append(el("span", { class: "pill-o pour" }, "Pour " + it.pour));
+  if (it.precision) pills.append(el("span", { class: "pill-o" }, it.precision));
+  pills.append(el("span", { class: "qui" }, it.fait ? "Dans le panier" : cap(who(it.par)) + (it.le ? " · " + rel(it.le) : "")));
+  txt.append(el("span", { class: "name" }, it.nom), pills);
 
   const del = el("button", { class: "del", type: "button", "aria-label": "Supprimer " + it.nom });
   del.dataset.id = it.id; del.dataset.role = "del";
@@ -461,7 +558,55 @@ function row(it, rayon) {
   return li;
 }
 
-function renderChips(todoKeys) {
+const CROIX = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>';
+const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+// L'aperçu « L'app a compris », recalculé à chaque lettre tapée.
+function renderSaisie() {
+  const texte = els.input.value;
+  const actif = !!texte.trim() || !!state.editing;
+  els.compris.hidden = !actif;
+  els.editCancel.hidden = !state.editing;
+  const enCours = state.editing ? state.items.get(state.editing) : null;
+  els.comprisTitre.textContent = enCours ? "Modifier « " + enCours.nom + " »" : "L'app a compris";
+  if (!actif) { els.jetons.replaceChildren(); els.rayonChoix.hidden = true; renderChips(); return; }
+  els.chips.hidden = true;
+
+  const p = parse(texte, personnesConnues());
+  const rayonId = state.draftRayon || (p.nom ? rayonDe(p.nom) : "autres");
+  const r = RAYON_PAR_ID[rayonId];
+  const out = [];
+
+  const jNom = el("button", { class: "jeton j-nom" + (p.nom ? "" : " j-vide"), type: "button", "aria-expanded": state.rayonOuvert ? "true" : "false", "aria-label": "Changer le rayon, actuellement " + r.nom });
+  jNom.dataset.role = "rayon";
+  if (p.nom) { jNom.style.background = r.tint; jNom.style.color = r.ink; }
+  jNom.append(document.createTextNode(p.nom ? p.nom + " · " + r.nom : "Nom de l'article ?"));
+  jNom.insertAdjacentHTML("beforeend", CHEVRON);
+  out.push(jNom);
+
+  p.jetons.forEach((j, i) => {
+    const b = el("button", { class: "jeton j-" + j.type, type: "button", "aria-label": "Retirer " + j.libelle });
+    b.dataset.role = "retirer"; b.dataset.index = String(i);
+    b.append(document.createTextNode(j.libelle));
+    b.insertAdjacentHTML("beforeend", CROIX);
+    out.push(b);
+  });
+  els.jetons.replaceChildren(...out);
+  els.jetons._jetons = p.jetons;
+
+  els.rayonChoix.hidden = !state.rayonOuvert;
+  if (state.rayonOuvert) {
+    els.rayonChoix.replaceChildren(...RAYONS.map((ry) => {
+      const b = el("button", { class: "jeton", type: "button", "aria-pressed": ry.id === rayonId ? "true" : "false" }, ry.nom);
+      b.dataset.rayon = ry.id;
+      b.style.background = ry.tint; b.style.color = ry.ink;
+      return b;
+    }));
+  }
+}
+
+function renderChips() {
+  const todoKeys = new Set([...state.items.values()].map((i) => norm(i.nom)));
   const entries = Object.entries(state.history)
     .filter(([k, v]) => v && typeof v.nom === "string" && v.nom.trim() && !todoKeys.has(k))
     .sort((a, b) => ((Number(b[1].n) || 0) - (Number(a[1].n) || 0)) || ((Number(b[1].t) || 0) - (Number(a[1].t) || 0)));
@@ -476,7 +621,7 @@ function renderChips(todoKeys) {
     c.append(el("span", { "aria-hidden": "true" }, "+"), document.createTextNode(" " + n));
     els.chips.append(c);
   }
-  els.chips.hidden = !state.loaded || names.length === 0;
+  els.chips.hidden = !state.loaded || names.length === 0 || !!els.input.value.trim() || !!state.editing;
 }
 
 function render() {
@@ -507,7 +652,7 @@ function render() {
   for (const r of RAYONS) {
     const list = groupes.get(r.id);
     if (!list.length) continue;
-    list.sort((x, y) => (x.fait - y.fait) || x.nom.localeCompare(y.nom, "fr", { sensitivity: "base" }));
+    list.sort((x, y) => (x.fait - y.fait) || ((y.urgent && !y.fait) - (x.urgent && !x.fait)) || x.nom.localeCompare(y.nom, "fr", { sensitivity: "base" }));
     const sec = el("section", { class: "rayon", "aria-labelledby": "r-" + r.id });
     const h = el("h2", { id: "r-" + r.id });
     h.style.color = r.ink;
@@ -530,14 +675,15 @@ function render() {
       els.emptyText.textContent = "Videz le panier une fois les courses rangées.";
     } else {
       els.emptyTitle.textContent = "Rien à acheter pour l'instant.";
-      els.emptyText.textContent = "Ce que vous ajoutez apparaît aussi sur le téléphone de l'autre, rangé par rayon.";
+      els.emptyText.textContent = "Essayez\u00a0«\u00a02\u00a0kg de pommes bio\u00a0» ou «\u00a06 yaourts pour Nicolas\u00a0!\u00a0» : l'app range tout, rayon par rayon.";
     }
   }
 
   els.panier.hidden = done.length === 0;
   els.panierText.replaceChildren(el("b", null, String(done.length)), document.createTextNode(" " + plural(done.length, "article", "articles") + " dans le panier"));
 
-  renderChips(new Set(all.map((i) => norm(i.nom))));
+  renderChips();
+  if (state.editing && !state.items.has(state.editing)) resetSaisie();
 
   if (focus) {
     const n = document.querySelector('[data-id="' + CSS.escape(focus.id) + '"][data-role="' + focus.role + '"]');
@@ -561,6 +707,12 @@ function startSync(user) {
       map.set(d.id, {
         id: d.id, nom, fait: v.fait === true,
         rayon: typeof v.rayon === "string" && RAYON_PAR_ID[v.rayon] ? v.rayon : rayonDe(nom),
+        quantite: Number(v.quantite) > 0 ? Math.min(Math.floor(Number(v.quantite)), 999) : null,
+        contenant: typeof v.contenant === "string" ? v.contenant.slice(0, 20) : null,
+        poids: typeof v.poids === "string" ? v.poids.slice(0, 20) : null,
+        pour: typeof v.pour === "string" ? v.pour.slice(0, 30) : null,
+        precision: typeof v.precision === "string" ? v.precision.slice(0, 80) : null,
+        urgent: v.urgent === true,
         par: typeof v.par === "string" ? v.par : null, le: Number(v.le) || 0,
         faitLe: Number(v.faitLe) || 0, faitPar: typeof v.faitPar === "string" ? v.faitPar : null,
         raw: v,
@@ -590,6 +742,7 @@ function startSync(user) {
   state.unsubs.push(onSnapshot(doc(db, "meta", "historique"), (snap) => {
     const d = snap.exists() ? snap.data() : null;
     state.history = d && d.noms && typeof d.noms === "object" ? d.noms : {};
+    state.personnes = d && d.personnes && typeof d.personnes === "object" ? d.personnes : {};
     render();
   }, () => { /* les suggestions restent les idées par défaut */ }));
 
@@ -682,14 +835,35 @@ onAuthStateChanged(auth, (user) => {
 els.form.addEventListener("submit", (e) => {
   e.preventDefault();
   const v = els.input.value;
-  els.input.value = "";
+  if (!v.trim()) return;
+  addFromText(v);
   els.input.focus();
-  addItem(v);
 });
+els.input.addEventListener("input", renderSaisie);
 els.chips.addEventListener("click", (e) => {
   const c = e.target.closest(".chip");
-  if (c) addItem(c.dataset.name);
+  if (c) addFromText(c.dataset.name);
 });
+els.jetons.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-role]");
+  if (!b) return;
+  if (b.dataset.role === "rayon") {
+    state.rayonOuvert = !state.rayonOuvert;
+  } else if (b.dataset.role === "retirer") {
+    const j = (els.jetons._jetons || [])[Number(b.dataset.index)];
+    if (j) els.input.value = retirer(els.input.value, j.plages);
+  }
+  renderSaisie();
+});
+els.rayonChoix.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-rayon]");
+  if (!b) return;
+  state.draftRayon = b.dataset.rayon;
+  state.rayonOuvert = false;
+  renderSaisie();
+  els.input.focus();
+});
+els.editCancel.addEventListener("click", resetSaisie);
 els.rayons.addEventListener("click", (e) => {
   const b = e.target.closest("button[data-role]");
   if (!b) return;
@@ -697,6 +871,7 @@ els.rayons.addEventListener("click", (e) => {
   if (!it) return;
   if (b.dataset.role === "toggle") toggle(it, !it.fait);
   else if (b.dataset.role === "del") removeItem(it);
+  else if (b.dataset.role === "edit") startEdit(it);
 });
 els.clear.addEventListener("click", clearBasket);
 
