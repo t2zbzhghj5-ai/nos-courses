@@ -54,7 +54,7 @@ const CATALOGUE = {
   ],
   boissons: [
     "eau", "eau gazeuse", "eau petillante", "jus", "jus d orange", "soda", "coca", "limonade", "sirop", "biere",
-    "vin", "vin rouge", "vin blanc", "rose", "champagne", "cremant", "cidre", "boisson", "lait d amande",
+    "vin", "vin rouge", "vin blanc", "rose", "champagne", "cremant", "cidre", "boisson", "lait vegetal", "boisson vegetale", "lait d amande",
     "lait d avoine", "lait de soja", "ice tea", "the glace",
   ],
   maison: [

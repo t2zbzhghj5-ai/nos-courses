@@ -452,10 +452,13 @@ function addFromText(texte) {
     return;
   }
 
+  // Un article est « le même » s'il a le même nom ET la même personne (ou aucune des deux côtés).
+  // « Lait végétal pour Marie » et « Lait végétal pour Louis » font donc deux lignes.
   const key = norm(data.nom);
-  const existing = [...state.items.values()].find((i) => norm(i.nom) === key);
+  const pourKey = norm(data.pour || "");
+  const existing = [...state.items.values()].find((i) => norm(i.nom) === key && norm(i.pour || "") === pourKey);
   if (existing) {
-    // Déjà sur la liste : on complète ses options avec ce qui vient d'être tapé.
+    // Déjà sur la liste pour la même personne : on complète ses options avec ce qui vient d'être tapé.
     const patch = {};
     for (const k of ["quantite", "contenant", "poids", "pour", "precision"]) if (data[k]) patch[k] = data[k];
     if (data.urgent) patch.urgent = true;
