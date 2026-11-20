@@ -219,6 +219,11 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .segment button { min-height: 44px; border: 0; border-radius: 11px; background: transparent; font-size: 15px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
 .segment button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); }
 .aide { margin: 0; font-size: 13px; color: var(--muted); }
+.switch { flex: none; width: 56px; height: 44px; margin-right: -4px; border: 0; background: none; padding: 0; display: grid; place-items: center; cursor: pointer; }
+.switch .piste { width: 52px; height: 32px; border-radius: 999px; background: var(--line); padding: 3px; display: flex; justify-content: flex-start; transition: background .15s; }
+.switch .bouton { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); }
+.switch[aria-checked="true"] .piste { background: var(--live-dot); justify-content: flex-end; }
+.switch:disabled { opacity: .5; cursor: default; }
 .ligne-btn { min-height: 52px; border: 0; background: transparent; padding: 0 16px; text-align: left; font-size: 16px; font-weight: 600; color: var(--accent); cursor: pointer; }
 .btn-logout { margin-top: auto; min-height: 52px; border: 0; border-radius: 16px; background: var(--urg-bg); color: var(--urg-ink); font-size: 16px; font-weight: 700; cursor: pointer; }
 .linkish { background: none; border: 0; padding: 4px 0; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; }
@@ -347,6 +352,17 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
   </div>
 
   <div class="groupe">
+    <h2 id="g-pastille">Pastille sur l'icône</h2>
+    <div class="carte" aria-labelledby="g-pastille">
+      <div class="ligne">
+        <span id="pastille-label">Nombre d'articles à acheter</span>
+        <button class="switch" id="pastille-switch" type="button" role="switch" aria-checked="false" aria-labelledby="pastille-label"><span class="piste" aria-hidden="true"><span class="bouton"></span></span></button>
+      </div>
+    </div>
+    <p class="aide" id="pastille-aide"></p>
+  </div>
+
+  <div class="groupe">
     <h2 id="g-apparence">Apparence</h2>
     <div class="segment" role="group" aria-labelledby="g-apparence">
       <button type="button" data-theme-choice="light" aria-pressed="true">Clair</button>
@@ -430,6 +446,7 @@ const els = {
   prenomForm: $("prenom-form"), prenomInput: $("prenom-input"), emailVal: $("email-val"), membres: $("membres"), membresAide: $("membres-aide"),
   toast: $("toast"), toastMsg: $("toast-msg"), toastUndo: $("toast-undo"),
   maj: $("maj"), majBtn: $("maj-btn"), majCheck: $("maj-check"), versionVal: $("version-val"),
+  pastilleSwitch: $("pastille-switch"), pastilleAide: $("pastille-aide"),
 };
 
 const RAYON_PAR_ID = Object.fromEntries(RAYONS.map((r) => [r.id, r]));
@@ -748,6 +765,58 @@ function renderSaisie() {
   }
 }
 
+/* ---------- Pastille sur l'icône ---------- */
+// L'iPhone affiche la pastille d'une app web installée seulement si les notifications sont autorisées.
+// L'app n'envoie aucune notification : l'autorisation sert uniquement à la pastille.
+const PASTILLE_KEY = "nos-courses.pastille";
+const pastillePossible = "setAppBadge" in navigator && "Notification" in window;
+let dernierePastille = null;
+function pastilleVoulue() { return lsGet(PASTILLE_KEY) !== "off"; }
+function pastilleActive() { return pastillePossible && pastilleVoulue() && Notification.permission === "granted"; }
+
+function majPastille(nombre) {
+  if (!pastillePossible) return;
+  const cible = pastilleActive() ? nombre : 0;
+  if (cible === dernierePastille) return;
+  dernierePastille = cible;
+  const p = cible > 0 ? navigator.setAppBadge(cible) : navigator.clearAppBadge();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function renderPastille() {
+  const sw = els.pastilleSwitch;
+  if (!pastillePossible) {
+    sw.disabled = true;
+    sw.setAttribute("aria-checked", "false");
+    els.pastilleAide.textContent = "Disponible quand l'app est ouverte depuis son icône sur l'écran d'accueil.";
+    return;
+  }
+  sw.disabled = false;
+  sw.setAttribute("aria-checked", String(pastilleActive()));
+  if (Notification.permission === "denied") {
+    els.pastilleAide.textContent = "L'iPhone a bloqué les notifications de Courses. Pour la pastille, autorisez-les dans Réglages › Notifications › Courses.";
+  } else if (pastilleActive()) {
+    els.pastilleAide.textContent = "Le nombre se met à jour quand l'app est ouverte, et reste affiché ensuite sur l'icône.";
+  } else {
+    els.pastilleAide.textContent = "L'iPhone va demander d'autoriser les notifications : l'app n'en envoie aucune, c'est seulement pour afficher la pastille.";
+  }
+}
+
+async function basculerPastille() {
+  if (!pastillePossible) return;
+  if (pastilleActive()) {
+    lsSet(PASTILLE_KEY, "off");
+  } else {
+    lsSet(PASTILLE_KEY, "on");
+    if (Notification.permission === "default") {
+      try { await Notification.requestPermission(); } catch (e) { /* refus ou annulation */ }
+    }
+  }
+  dernierePastille = null;
+  majPastille([...state.items.values()].filter((i) => !i.fait).length);
+  renderPastille();
+}
+
 /* ---------- Paramètres ---------- */
 function monPrenom() { return (state.user && state.members[state.user.uid]) || guessName(state.user && state.user.email); }
 
@@ -770,6 +839,7 @@ function renderSettings() {
     return ligne;
   }));
   els.membresAide.hidden = ids.length > 1;
+  renderPastille();
 }
 
 function enregistrerPrenom() {
@@ -806,6 +876,7 @@ function render() {
   const todo = all.filter((i) => !i.fait);
   const done = all.filter((i) => i.fait);
 
+  majPastille(todo.length);
   els.summary.replaceChildren();
   if (todo.length) els.summary.append(el("b", null, String(todo.length)), document.createTextNode(" à acheter"));
   else els.summary.append(document.createTextNode("Rien à acheter"));
@@ -975,7 +1046,7 @@ els.forgot.addEventListener("click", async () => {
   }
 });
 
-els.logout.addEventListener("click", () => { markSeen(); signOut(auth).catch(() => {}); });
+els.logout.addEventListener("click", () => { markSeen(); majPastille(0); signOut(auth).catch(() => {}); });
 
 onAuthStateChanged(auth, (user) => {
   els.boot.hidden = true;
@@ -1042,6 +1113,7 @@ els.back.addEventListener("click", () => {
 window.addEventListener("hashchange", afficherVue);
 els.prenomForm.addEventListener("submit", (e) => { e.preventDefault(); els.prenomInput.blur(); });
 els.prenomInput.addEventListener("blur", enregistrerPrenom);
+els.pastilleSwitch.addEventListener("click", basculerPastille);
 
 // Conseil d'installation : seulement sur iPhone/iPad, dans Safari, hors app installée.
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1058,7 +1130,7 @@ setInterval(() => { if (state.loaded) render(); }, 60000);
 
 /* ---------- Mises à jour de l'app ---------- */
 // À chaque publication, ce numéro et celui de version.json changent ensemble.
-const APP_VERSION = "2026-11-20-17h45";
+const APP_VERSION = "2026-11-20-18h00";
 {
   const m = APP_VERSION.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})h(\d{2})$/);
   els.versionVal.textContent = m ? m[3] + "/" + m[2] + "/" + m[1] + " · " + m[4] + "h" + m[5] : APP_VERSION;
