@@ -19,7 +19,7 @@ Les articles sont rangés automatiquement par rayon grâce au catalogue de `rayo
 |---|---|
 | `articles/{id}` | `nom`, `quantite`, `contenant`, `poids`, `pour`, `precision`, `urgent`, `rayon` (choisi à la main, sinon déduit du nom), `fait`, `par` (UID), `le` (horodatage), `faitLe`, `faitPar` |
 | `membres/{uid}` | `prenom` affiché à l'autre personne |
-| `meta/historique` | `noms` : articles déjà achetés, pour les rajouter en un geste ; `personnes` : prénoms déjà utilisés après « pour » |
+| `meta/historique` | `personnes` : prénoms déjà utilisés après « pour » |
 
 ## Saisie intelligente
 

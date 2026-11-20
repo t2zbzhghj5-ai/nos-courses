@@ -74,11 +74,6 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .field:focus { box-shadow: 0 0 0 2px var(--accent); }
 .btn-add { flex: none; width: 52px; height: 52px; border: 0; border-radius: 16px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; }
 .btn-add:active { transform: translateY(1px); }
-.chips { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 14px -24px 0; padding: 0 24px 2px; }
-.chips::-webkit-scrollbar { display: none; }
-.chips-label { flex: none; font-size: 13px; font-weight: 700; color: var(--muted); }
-.chip { flex: none; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: 15px; color: var(--ink); cursor: pointer; }
-.chip span { color: var(--accent); font-weight: 700; }
 
 /* Saisie intelligente */
 .compris { margin-top: 12px; background: #F7F8FB; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
@@ -218,7 +213,6 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
       <div class="rayon-choix" id="rayon-choix" hidden></div>
       <p class="astuce">Écrivez «&nbsp;2&nbsp;kg&nbsp;», «&nbsp;500&nbsp;g&nbsp;», «&nbsp;x3&nbsp;», «&nbsp;pour&nbsp;Prénom&nbsp;», «&nbsp;bio&nbsp;»… et «&nbsp;!&nbsp;» pour urgent. Touchez une étiquette pour la retirer.</p>
     </div>
-    <div class="chips" id="chips" hidden><span class="chips-label" id="chips-label">Racheter</span></div>
   </div>
 
   <div class="notice" id="notice" role="alert" hidden></div>
@@ -274,7 +268,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
-  collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDoc, writeBatch, increment,
+  collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDoc, writeBatch,
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { RAYONS, rayonDe, norm } from "./rayons.js";
 import { parse, retirer, enTexte, libelleQuantite } from "./parse.js";
@@ -304,7 +298,7 @@ const els = {
   boot: $("boot"), login: $("login"), app: $("app"),
   loginForm: $("login-form"), loginEmail: $("login-email"), loginPass: $("login-pass"), loginMsg: $("login-msg"), loginBtn: $("login-btn"), forgot: $("forgot-btn"),
   today: $("today"), pill: $("pill"), pillText: $("pill-text"), summary: $("summary"),
-  form: $("add-form"), input: $("add-input"), chips: $("chips"), chipsLabel: $("chips-label"),
+  form: $("add-form"), input: $("add-input"),
   compris: $("compris"), comprisTitre: $("compris-titre"), jetons: $("jetons"), rayonChoix: $("rayon-choix"), editCancel: $("edit-cancel"),
   notice: $("notice"), rayons: $("rayons"), empty: $("empty"), emptyTitle: $("empty-title"), emptyText: $("empty-text"),
   panier: $("panier"), panierText: $("panier-text"), clear: $("clear-btn"),
@@ -312,13 +306,12 @@ const els = {
   toast: $("toast"), toastMsg: $("toast-msg"), toastUndo: $("toast-undo"),
 };
 
-const IDEAS = ["Lait", "Pain", "Œufs", "Beurre", "Tomates", "Pâtes", "Café", "Papier toilette"];
 const RAYON_PAR_ID = Object.fromEntries(RAYONS.map((r) => [r.id, r]));
 
 const state = {
   user: null, unsubs: [],
   items: new Map(), loaded: false,
-  members: {}, history: {},
+  members: {},
   prevSeen: null, flash: null, undo: null,
   editing: null, draftRayon: null, rayonOuvert: false, personnes: {},
 };
@@ -499,14 +492,7 @@ function clearBasket() {
   const done = [...state.items.values()].filter((i) => i.fait);
   if (!done.length) return;
   const batch = writeBatch(db);
-  const noms = {};
-  const now = Date.now();
-  for (const i of done) {
-    batch.delete(doc(db, "articles", i.id));
-    const k = norm(i.nom);
-    if (k) noms[k] = { nom: i.nom, n: increment(1), t: now };
-  }
-  batch.set(doc(db, "meta", "historique"), { noms }, { merge: true });
+  for (const i of done) batch.delete(doc(db, "articles", i.id));
   send(batch.commit());
   const backup = done.map((i) => ({ id: i.id, data: { ...i.raw } }));
   toast("Panier vidé (" + done.length + " " + plural(done.length, "article", "articles") + ")", () => {
@@ -572,8 +558,7 @@ function renderSaisie() {
   els.editCancel.hidden = !state.editing;
   const enCours = state.editing ? state.items.get(state.editing) : null;
   els.comprisTitre.textContent = enCours ? "Modifier « " + enCours.nom + " »" : "L'app a compris";
-  if (!actif) { els.jetons.replaceChildren(); els.rayonChoix.hidden = true; renderChips(); return; }
-  els.chips.hidden = true;
+  if (!actif) { els.jetons.replaceChildren(); els.rayonChoix.hidden = true; return; }
 
   const p = parse(texte, personnesConnues());
   const rayonId = state.draftRayon || (p.nom ? rayonDe(p.nom) : "autres");
@@ -606,25 +591,6 @@ function renderSaisie() {
       return b;
     }));
   }
-}
-
-function renderChips() {
-  const todoKeys = new Set([...state.items.values()].map((i) => norm(i.nom)));
-  const entries = Object.entries(state.history)
-    .filter(([k, v]) => v && typeof v.nom === "string" && v.nom.trim() && !todoKeys.has(k))
-    .sort((a, b) => ((Number(b[1].n) || 0) - (Number(a[1].n) || 0)) || ((Number(b[1].t) || 0) - (Number(a[1].t) || 0)));
-  let names, label;
-  if (Object.keys(state.history).length) { names = entries.slice(0, 12).map(([, v]) => clean(v.nom)); label = "Racheter"; }
-  else { names = IDEAS.filter((n) => !todoKeys.has(norm(n))); label = "Idées"; }
-  els.chips.querySelectorAll(".chip").forEach((c) => c.remove());
-  els.chipsLabel.textContent = label;
-  for (const n of names) {
-    const c = el("button", { class: "chip", type: "button", "aria-label": "Ajouter " + n });
-    c.dataset.name = n;
-    c.append(el("span", { "aria-hidden": "true" }, "+"), document.createTextNode(" " + n));
-    els.chips.append(c);
-  }
-  els.chips.hidden = !state.loaded || names.length === 0 || !!els.input.value.trim() || !!state.editing;
 }
 
 function render() {
@@ -685,7 +651,6 @@ function render() {
   els.panier.hidden = done.length === 0;
   els.panierText.replaceChildren(el("b", null, String(done.length)), document.createTextNode(" " + plural(done.length, "article", "articles") + " dans le panier"));
 
-  renderChips();
   if (state.editing && !state.items.has(state.editing)) resetSaisie();
 
   if (focus) {
@@ -744,10 +709,9 @@ function startSync(user) {
 
   state.unsubs.push(onSnapshot(doc(db, "meta", "historique"), (snap) => {
     const d = snap.exists() ? snap.data() : null;
-    state.history = d && d.noms && typeof d.noms === "object" ? d.noms : {};
     state.personnes = d && d.personnes && typeof d.personnes === "object" ? d.personnes : {};
     render();
-  }, () => { /* les suggestions restent les idées par défaut */ }));
+  }, () => { /* les prénoms déjà utilisés restent inconnus */ }));
 
   // Le prénom affiché à l'autre : créé une fois à partir de l'e-mail, modifiable en bas de l'app.
   getDoc(doc(db, "membres", user.uid)).then((s) => {
@@ -761,7 +725,7 @@ function stopSync() {
   state.items = new Map();
   state.loaded = false;
   state.members = {};
-  state.history = {};
+  state.personnes = {};
 }
 
 window.addEventListener("online", () => { if (state.user && els.pill.dataset.s === "offline") setStatus("connecting"); });
@@ -843,10 +807,6 @@ els.form.addEventListener("submit", (e) => {
   els.input.focus();
 });
 els.input.addEventListener("input", renderSaisie);
-els.chips.addEventListener("click", (e) => {
-  const c = e.target.closest(".chip");
-  if (c) addFromText(c.dataset.name);
-});
 els.jetons.addEventListener("click", (e) => {
   const b = e.target.closest("button[data-role]");
   if (!b) return;
