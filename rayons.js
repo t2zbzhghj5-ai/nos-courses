@@ -23,7 +23,7 @@ const CATALOGUE = {
     "poivron", "concombre", "oignon", "echalote", "ail", "poireau", "chou", "chou fleur", "brocoli", "champignon",
     "haricot vert", "petit pois", "radis", "betterave", "celeri", "fenouil", "potiron", "courge", "butternut",
     "navet", "endive", "artichaut", "asperge", "persil", "basilic", "coriandre", "ciboulette", "menthe", "thym",
-    "romarin", "gingembre", "herbe", "mais doux",
+    "romarin", "gingembre", "herbe", "mais doux", "chataigne", "marron", "noix fraiche", "coing", "kaki", "physalis",
   ],
   boulangerie: [
     "pain", "baguette", "tradition", "ficelle", "brioche", "croissant", "pain au chocolat", "chocolatine",
@@ -50,7 +50,8 @@ const CATALOGUE = {
     "flocons d avoine", "biscuit", "gateau", "madeleine", "compote", "confiture", "miel", "pate a tartiner",
     "nutella", "chips", "cacahuete", "amande", "noix", "noisette", "pistache", "fruits secs", "olive", "cornichon",
     "bouillon", "epice", "curry", "paprika", "cannelle", "levure", "puree", "soupe", "biscotte", "chapelure",
-    "lait de coco", "creme de coco", "aperitif", "bonbon",
+    "lait de coco", "creme de coco", "aperitif", "bonbon", "chataigne cuite", "chataigne sous vide",
+    "creme de marron", "marron glace", "puree de marron",
   ],
   boissons: [
     "eau", "eau gazeuse", "eau petillante", "jus", "jus d orange", "soda", "coca", "limonade", "sirop", "biere",
