@@ -4,14 +4,14 @@
 // Pour ajouter un mot, il suffit de l'écrire au singulier dans la liste de son rayon.
 
 export const RAYONS = [
-  { id: "fruits", nom: "Fruits et légumes", ink: "#23663A", ring: "#2E9E4F", tint: "#E3F5E1" },
-  { id: "boulangerie", nom: "Boulangerie", ink: "#9A2457", ring: "#D63B7A", tint: "#FDE7EF" },
-  { id: "frais", nom: "Frais", ink: "#1E4F9A", ring: "#2F74E0", tint: "#E2EEFF" },
-  { id: "surgeles", nom: "Surgelés", ink: "#0E5A73", ring: "#1A93B8", tint: "#DDF3FA" },
-  { id: "epicerie", nom: "Épicerie", ink: "#8A4B00", ring: "#C27A00", tint: "#FFF0D9" },
-  { id: "boissons", nom: "Boissons", ink: "#9A2E17", ring: "#E05A3A", tint: "#FFE6E0" },
-  { id: "maison", nom: "Maison et hygiène", ink: "#5534A8", ring: "#7A56E8", tint: "#EEE8FF" },
-  { id: "autres", nom: "Autres", ink: "#4A4F5C", ring: "#7D8391", tint: "#EEF0F4" },
+  { id: "fruits", nom: "Fruits et légumes", ink: "#23663A", ring: "#2E9E4F", tint: "#E3F5E1", inkD: "#8FD9A2", ringD: "#4CC46D", tintD: "#1C3324" },
+  { id: "boulangerie", nom: "Boulangerie", ink: "#9A2457", ring: "#D63B7A", tint: "#FDE7EF", inkD: "#F3A3C4", ringD: "#E5679A", tintD: "#3A1E2A" },
+  { id: "frais", nom: "Frais", ink: "#1E4F9A", ring: "#2F74E0", tint: "#E2EEFF", inkD: "#9CC1FF", ringD: "#5B95F0", tintD: "#1B2A44" },
+  { id: "surgeles", nom: "Surgelés", ink: "#0E5A73", ring: "#1A93B8", tint: "#DDF3FA", inkD: "#8ED6EC", ringD: "#3BB3D6", tintD: "#15323B" },
+  { id: "epicerie", nom: "Épicerie", ink: "#8A4B00", ring: "#C27A00", tint: "#FFF0D9", inkD: "#F5C77A", ringD: "#E0A030", tintD: "#3A2A12" },
+  { id: "boissons", nom: "Boissons", ink: "#9A2E17", ring: "#E05A3A", tint: "#FFE6E0", inkD: "#FFAE98", ringD: "#F0785A", tintD: "#3D2019" },
+  { id: "maison", nom: "Maison et hygiène", ink: "#5534A8", ring: "#7A56E8", tint: "#EEE8FF", inkD: "#C3B1FF", ringD: "#9A7EF5", tintD: "#2A2142" },
+  { id: "autres", nom: "Autres", ink: "#4A4F5C", ring: "#7D8391", tint: "#EEF0F4", inkD: "#B5BAC6", ringD: "#8E93A1", tintD: "#262A31" },
 ];
 
 const CATALOGUE = {

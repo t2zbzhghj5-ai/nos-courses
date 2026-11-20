@@ -5,8 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nos courses</title>
 <meta name="description" content="La liste de courses partagée de la maison.">
-<meta name="theme-color" content="#FFFFFF">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFFFFF" id="theme-color">
+<meta name="color-scheme" content="light dark">
+<script>
+  // Apparence choisie (clair, sombre ou comme l'iPhone), appliquée avant l'affichage pour éviter un flash.
+  (function () {
+    var choix = "light";
+    try { choix = localStorage.getItem("nos-courses.theme") || "light"; } catch (e) {}
+    var sombre = choix === "dark" || (choix === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.dataset.mode = sombre ? "dark" : "light";
+    document.getElementById("theme-color").content = sombre ? "#121418" : "#FFFFFF";
+  })();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -19,21 +29,67 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* Maquette 1 « Rayons pastel » : fond blanc, une colonne aérée, une couleur par rayon, un accent indigo pour les actions. */
+  /* Maquette 1 « Rayons pastel » : fond blanc, une colonne aérée, une couleur par rayon, un accent indigo pour les actions.
+     Le mode sombre redéfinit les mêmes jetons plus bas (html[data-mode="dark"]). */
   --bg: #FFFFFF;
   --soft: #F3F4F8;
+  --card: #F7F8FB;
+  --chip: #FFFFFF;
   --ink: #1B1D22;
+  --ink-2: #4A4F5C;
   --muted: #6B7080;
   --faint: #8E93A1;
   --line: #E6E8EF;
+  --del: #B5BAC6;
   --accent: #4353FF;
   --accent-ink: #FFFFFF;
   --new-bg: #FFE7A3;
   --new-ink: #6B4A00;
+  --pour-bg: #E9EBFF;
+  --pour-ink: #2D3AD1;
+  --urg-bg: #FDE4E1;
+  --urg-ink: #B42318;
+  --note-bg: #FFF6D6;
+  --note-ink: #5C4300;
+  --live-bg: #E3F5E1; --live-ink: #23663A; --live-dot: #4CB867;
+  --send-bg: #E2EEFF; --send-ink: #1E4F9A; --send-dot: #4A8BF0;
+  --off-bg: #FFF0D9; --off-ink: #8A4B00; --off-dot: #F5A524;
   --danger: #B42318;
+  --toast-bg: #1B1D22; --toast-ink: #FFFFFF; --toast-link: #AEB6FF;
   --font: "Figtree", -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
+html[data-mode="dark"] {
+  --bg: #121418;
+  --soft: #1E2128;
+  --card: #1A1D23;
+  --chip: #262A32;
+  --ink: #ECEEF2;
+  --ink-2: #C3C7D0;
+  --muted: #9AA0AE;
+  --faint: #737A88;
+  --line: #2E323B;
+  --del: #5E6572;
+  --accent: #6E7BFF;
+  --accent-ink: #FFFFFF;
+  --new-bg: #4A3B0B;
+  --new-ink: #FFD978;
+  --pour-bg: #262C5C;
+  --pour-ink: #B9C0FF;
+  --urg-bg: #4A1E1A;
+  --urg-ink: #FF9C8F;
+  --note-bg: #3A3013;
+  --note-ink: #FFE3A0;
+  --live-bg: #183324; --live-ink: #8FD9A2; --live-dot: #4CC46D;
+  --send-bg: #1B2A44; --send-ink: #9CC1FF; --send-dot: #5B95F0;
+  --off-bg: #3A2A12; --off-ink: #F5C77A; --off-dot: #E0A030;
+  --danger: #FF8A7A;
+  --toast-bg: #ECEEF2; --toast-ink: #121418; --toast-link: #3442E0;
+  color-scheme: dark;
+}
+/* Couleurs d'un rayon : posées sur l'élément par le script, version claire ou sombre selon le mode. */
+[data-r] { --c-ink: var(--ri); --c-ring: var(--rr); --c-tint: var(--rt); }
+html[data-mode="dark"] [data-r] { --c-ink: var(--ri-d); --c-ring: var(--rr-d); --c-tint: var(--rt-d); }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; background: var(--bg); }
@@ -50,17 +106,17 @@ button { -webkit-tap-highlight-color: transparent; }
 /* En-tête */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .date { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); }
-.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; color: #4A4F5C; background: var(--soft); }
-.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #A3A8B5; }
-.pill[data-s="live"] { color: #23663A; background: #E3F5E1; }
-.pill[data-s="live"] .dot { background: #4CB867; }
-.pill[data-s="sending"] { color: #1E4F9A; background: #E2EEFF; }
-.pill[data-s="sending"] .dot { background: #4A8BF0; animation: pulse 1.2s ease-in-out infinite; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; color: var(--ink-2); background: var(--soft); }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+.pill[data-s="live"] { color: var(--live-ink); background: var(--live-bg); }
+.pill[data-s="live"] .dot { background: var(--live-dot); }
+.pill[data-s="sending"] { color: var(--send-ink); background: var(--send-bg); }
+.pill[data-s="sending"] .dot { background: var(--send-dot); animation: pulse 1.2s ease-in-out infinite; }
 .pill[data-s="connecting"] .dot { animation: pulse 1.2s ease-in-out infinite; }
-.pill[data-s="offline"] { color: #8A4B00; background: #FFF0D9; }
-.pill[data-s="offline"] .dot { background: #F5A524; }
-.pill[data-s="error"] { color: var(--danger); background: #FDE4E1; }
-.pill[data-s="error"] .dot { background: var(--danger); }
+.pill[data-s="offline"] { color: var(--off-ink); background: var(--off-bg); }
+.pill[data-s="offline"] .dot { background: var(--off-dot); }
+.pill[data-s="error"] { color: var(--urg-ink); background: var(--urg-bg); }
+.pill[data-s="error"] .dot { background: var(--urg-ink); }
 @keyframes pulse { 50% { opacity: .3; } }
 h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
 .summary { margin: 4px 0 0; font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -76,54 +132,54 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .btn-add:active { transform: translateY(1px); }
 
 /* Saisie intelligente */
-.compris { margin-top: 12px; background: #F7F8FB; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.compris { margin-top: 12px; background: var(--card); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
 .compris-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 20px; }
 .compris-titre { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
 .compris-top .linkish { padding: 0; }
 .jetons, .rayon-choix { display: flex; flex-wrap: wrap; gap: 6px; }
-.jeton { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; border: 0; border-radius: 8px; padding: 5px 9px 5px 10px; font-size: 14px; font-weight: 600; cursor: pointer; background: #FFFFFF; color: #4A4F5C; box-shadow: inset 0 0 0 1px var(--line); }
+.jeton { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; border: 0; border-radius: 8px; padding: 5px 9px 5px 10px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--chip); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
 .jeton svg { width: 12px; height: 12px; flex: none; }
-.jeton.j-nom { font-weight: 700; box-shadow: none; }
+.jeton.j-nom { font-weight: 700; box-shadow: none; background: var(--c-tint, var(--chip)); color: var(--c-ink, var(--ink-2)); }
 .jeton.j-vide { color: var(--faint); font-weight: 500; }
-.jeton.j-pour { background: #E9EBFF; color: #2D3AD1; box-shadow: none; }
-.jeton.j-urgent { background: #FDE4E1; color: #B42318; box-shadow: none; }
-.rayon-choix .jeton { box-shadow: none; font-weight: 700; }
+.jeton.j-pour { background: var(--pour-bg); color: var(--pour-ink); box-shadow: none; }
+.jeton.j-urgent { background: var(--urg-bg); color: var(--urg-ink); box-shadow: none; }
+.rayon-choix .jeton { box-shadow: none; font-weight: 700; background: var(--c-tint); color: var(--c-ink); }
 .rayon-choix .jeton[aria-pressed="true"] { box-shadow: inset 0 0 0 2px currentColor; }
 .astuce { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
 
 /* Messages */
-.notice { margin-top: 16px; background: #FFF6D6; border-radius: 14px; padding: 12px 14px; font-size: 15px; color: #5C4300; }
+.notice { margin-top: 16px; background: var(--note-bg); border-radius: 14px; padding: 12px 14px; font-size: 15px; color: var(--note-ink); }
 .install { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
 .install p { margin: 0; }
 
 /* Rayons */
 .rayons { margin-top: 24px; display: flex; flex-direction: column; gap: 18px; }
-.rayon h2 { margin: 0 0 2px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
-.rayon h2 .dot { width: 10px; height: 10px; border-radius: 50%; }
+.rayon h2 { margin: 0 0 2px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-ink); }
+.rayon h2 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-ring); }
 .rayon h2 .count { color: var(--faint); font-weight: 600; letter-spacing: 0; }
 .items { list-style: none; margin: 0; padding: 0; }
 .item { display: flex; align-items: center; gap: 8px; min-height: 52px; border-radius: 12px; }
-.check { flex: none; width: 44px; height: 44px; margin-left: -11px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; }
+.check { flex: none; width: 44px; height: 44px; margin-left: -11px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; color: var(--c-ring); }
 .ring { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; transition: background .15s; }
 .check:active .ring { background: currentColor; }
 .item.done .ring { background: currentColor; }
 .ring svg { width: 13px; height: 13px; }
 .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 6px 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .pills { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.pill-o { font-size: 12px; font-weight: 600; border-radius: 6px; padding: 2px 7px; background: var(--soft); color: #4A4F5C; }
-.pill-o.pour { background: #E9EBFF; color: #2D3AD1; }
-.pill-o.urgent { background: #FDE4E1; color: #B42318; }
+.pill-o { font-size: 12px; font-weight: 600; border-radius: 6px; padding: 2px 7px; background: var(--soft); color: var(--ink-2); }
+.pill-o.pour { background: var(--pour-bg); color: var(--pour-ink); }
+.pill-o.urgent { background: var(--urg-bg); color: var(--urg-ink); }
 .item.done .pill-o { opacity: .55; }
 .qui { font-size: 13px; color: var(--muted); }
 .name { font-size: 17px; font-weight: 500; overflow-wrap: anywhere; }
 .new { background: var(--new-bg); color: var(--new-ink); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 5px; padding: 1px 6px; }
 .item.done .name { color: var(--faint); text-decoration: line-through; }
 .item.done .qui { color: var(--faint); }
-.del { flex: none; width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: #B5BAC6; display: grid; place-items: center; cursor: pointer; }
+.del { flex: none; width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: var(--del); display: grid; place-items: center; cursor: pointer; }
 .del svg { width: 16px; height: 16px; }
 @media (hover: hover) { .del:hover { color: var(--danger); } }
 .item.flash { animation: flash 1.4s ease-out; }
-@keyframes flash { 0%, 35% { background: #FFF6D6; } 100% { background: transparent; } }
+@keyframes flash { 0%, 35% { background: var(--note-bg); } 100% { background: transparent; } }
 .empty { margin-top: 28px; border-radius: 18px; background: var(--soft); padding: 24px 20px; color: var(--muted); font-size: 16px; }
 .empty strong { display: block; color: var(--ink); font-size: 18px; margin-bottom: 4px; }
 
@@ -132,9 +188,13 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .panier span { font-size: 15px; }
 .btn-light { flex: none; border: 0; border-radius: 12px; background: var(--bg); color: var(--ink); font-size: 15px; font-weight: 700; padding: 10px 14px; cursor: pointer; }
 
-/* Compte */
+/* Compte et apparence */
 .account { margin-top: auto; padding-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); text-align: center; }
 .account p { margin: 0; }
+.theme { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+.theme-label { font-size: 14px; font-weight: 700; color: var(--muted); margin-right: 4px; }
+.theme button { min-height: 36px; border: 0; border-radius: 999px; background: var(--soft); color: var(--ink); padding: 7px 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.theme button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .linkish { background: none; border: 0; padding: 4px 0; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; }
 .rename { display: flex; gap: 8px; width: 100%; max-width: 360px; margin: 6px 0; }
 .rename .field { height: 44px; }
@@ -154,12 +214,12 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
 .swatch span { width: 10px; height: 10px; border-radius: 50%; }
 .msg { margin: 4px 0 0; font-size: 15px; }
 .msg.err { color: var(--danger); }
-.msg.ok { color: #23663A; }
+.msg.ok { color: var(--live-ink); }
 
 /* Toast */
-.toast { position: fixed; left: 50%; bottom: 20px; z-index: 10; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); background: var(--ink); color: #FFFFFF; border-radius: 14px; padding: 8px 8px 8px 16px; font-size: 15px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .35); }
+.toast { position: fixed; left: 50%; bottom: 20px; z-index: 10; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); background: var(--toast-bg); color: var(--toast-ink); border-radius: 14px; padding: 8px 8px 8px 16px; font-size: 15px; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .35); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
-.toast button { flex: none; background: none; border: 0; color: #AEB6FF; font-size: 15px; font-weight: 700; padding: 8px 10px; cursor: pointer; }
+.toast button { flex: none; background: none; border: 0; color: var(--toast-link); font-size: 15px; font-weight: 700; padding: 8px 10px; cursor: pointer; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -233,6 +293,12 @@ h1 { margin: 4px 0 0; font-size: 38px; line-height: 1.1; font-weight: 800; lette
   </div>
 
   <footer class="account">
+    <div class="theme" role="group" aria-label="Apparence">
+      <span class="theme-label">Apparence</span>
+      <button type="button" data-theme-choice="light" aria-pressed="true">Clair</button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false">Sombre</button>
+      <button type="button" data-theme-choice="auto" aria-pressed="false">Auto</button>
+    </div>
     <p><span id="me-line"></span> · <button class="linkish" id="rename-btn" type="button">Changer</button></p>
     <form class="rename" id="rename-form" hidden>
       <label for="rename-input" class="sr">Votre prénom dans la liste</label>
@@ -307,6 +373,36 @@ const els = {
 };
 
 const RAYON_PAR_ID = Object.fromEntries(RAYONS.map((r) => [r.id, r]));
+
+// Pose les couleurs d'un rayon sur un élément ; la feuille de style choisit la version claire ou sombre.
+function paint(node, r) {
+  node.dataset.r = r.id;
+  node.style.setProperty("--ri", r.ink); node.style.setProperty("--ri-d", r.inkD);
+  node.style.setProperty("--rr", r.ring); node.style.setProperty("--rr-d", r.ringD);
+  node.style.setProperty("--rt", r.tint); node.style.setProperty("--rt-d", r.tintD);
+}
+
+/* ---------- Apparence : clair, sombre ou comme l'iPhone ---------- */
+const THEME_KEY = "nos-courses.theme";
+const prefereSombre = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+function appliquerTheme() {
+  let choix = "light";
+  try { choix = localStorage.getItem(THEME_KEY) || "light"; } catch (e) { /* rien */ }
+  const sombre = choix === "dark" || (choix === "auto" && !!prefereSombre && prefereSombre.matches);
+  document.documentElement.dataset.mode = sombre ? "dark" : "light";
+  const meta = document.getElementById("theme-color");
+  if (meta) meta.content = sombre ? "#121418" : "#FFFFFF";
+  document.querySelectorAll("[data-theme-choice]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === choix)));
+}
+document.querySelectorAll("[data-theme-choice]").forEach((b) => b.addEventListener("click", () => {
+  try { localStorage.setItem(THEME_KEY, b.dataset.themeChoice); } catch (e) { /* rien */ }
+  appliquerTheme();
+}));
+if (prefereSombre) {
+  if (prefereSombre.addEventListener) prefereSombre.addEventListener("change", appliquerTheme);
+  else if (prefereSombre.addListener) prefereSombre.addListener(appliquerTheme);
+}
+appliquerTheme();
 
 const state = {
   user: null, unsubs: [],
@@ -522,7 +618,6 @@ function row(it, rayon) {
     "aria-label": it.fait ? "Remettre " + it.nom + " dans la liste" : "Mettre " + it.nom + " dans le panier",
   });
   check.dataset.id = it.id; check.dataset.role = "toggle";
-  check.style.color = rayon.ring;
   const ring = el("span", { class: "ring", "aria-hidden": "true" });
   if (it.fait) ring.innerHTML = CHECK_ICON;
   check.append(ring);
@@ -567,7 +662,7 @@ function renderSaisie() {
 
   const jNom = el("button", { class: "jeton j-nom" + (p.nom ? "" : " j-vide"), type: "button", "aria-expanded": state.rayonOuvert ? "true" : "false", "aria-label": "Changer le rayon, actuellement " + r.nom });
   jNom.dataset.role = "rayon";
-  if (p.nom) { jNom.style.background = r.tint; jNom.style.color = r.ink; }
+  if (p.nom) paint(jNom, r);
   jNom.append(document.createTextNode(p.nom ? p.nom + " · " + r.nom : "Nom de l'article ?"));
   jNom.insertAdjacentHTML("beforeend", CHEVRON);
   out.push(jNom);
@@ -587,7 +682,7 @@ function renderSaisie() {
     els.rayonChoix.replaceChildren(...RAYONS.map((ry) => {
       const b = el("button", { class: "jeton", type: "button", "aria-pressed": ry.id === rayonId ? "true" : "false" }, ry.nom);
       b.dataset.rayon = ry.id;
-      b.style.background = ry.tint; b.style.color = ry.ink;
+      paint(b, ry);
       return b;
     }));
   }
@@ -623,10 +718,9 @@ function render() {
     if (!list.length) continue;
     list.sort((x, y) => (x.fait - y.fait) || ((y.urgent && !y.fait) - (x.urgent && !x.fait)) || x.nom.localeCompare(y.nom, "fr", { sensitivity: "base" }));
     const sec = el("section", { class: "rayon", "aria-labelledby": "r-" + r.id });
+    paint(sec, r);
     const h = el("h2", { id: "r-" + r.id });
-    h.style.color = r.ink;
     const dot = el("span", { class: "dot", "aria-hidden": "true" });
-    dot.style.background = r.ring;
     const restants = list.filter((i) => !i.fait).length;
     h.append(dot, document.createTextNode(r.nom), el("span", { class: "count" }, restants ? String(restants) : "✓"));
     const ul = el("ul", { class: "items" });
