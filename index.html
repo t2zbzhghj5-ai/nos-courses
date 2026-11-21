@@ -21,8 +21,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Courses">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=panier">
+<link rel="icon" type="image/png" href="icon-192.png?v=panier">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1086,7 +1086,7 @@ try { localStorage.removeItem("nos-courses.pastille"); } catch (e) { /* rien */ 
 
 /* ---------- Mises à jour de l'app ---------- */
 // À chaque publication, ce numéro et celui de version.json changent ensemble.
-const APP_VERSION = "2026-11-20-20h35";
+const APP_VERSION = "2026-11-21-09h45";
 {
   const m = APP_VERSION.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})h(\d{2})$/);
   els.versionVal.textContent = m ? m[3] + "/" + m[2] + "/" + m[1] + " · " + m[4] + "h" + m[5] : APP_VERSION;
